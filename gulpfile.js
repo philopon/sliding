@@ -1,6 +1,9 @@
-var gulp       = require('gulp');
-var purescript = require('gulp-purescript');
-var foreach    = require('gulp-foreach');
+var gulp        = require('gulp');
+var purescript  = require('gulp-purescript');
+var foreach     = require('gulp-foreach');
+var plumber     = require('gulp-plumber');
+var notify      = require('gulp-notify');
+var browserSync = require('browser-sync');
 
 var path       = require('path');
 
@@ -33,15 +36,23 @@ gulp.task('pscDocs', function(){
     }));
 });
 
+gulp.task('develop', function(){
+  browserSync({server: {baseDir: "examples"}, startPath: 'index.html'});
+
+  gulp.watch(sources, ['example']);
+});
+
 gulp.task('example', function(){
   return gulp
     .src(sources)
+    .pipe(plumber({errorHandler: notify.onError("Error: <%= error.message %>")}))
     .pipe(purescript.psc(
       { main: "Main"
       , output: 'main.js'
       , modules: ['Main']
       }))
-    .pipe(gulp.dest('examples/'));
+    .pipe(gulp.dest('examples/'))
+    .pipe(browserSync.reload({stream: true}));
 });
 
 gulp.task('default', ['pscMake', 'dotPsci', 'pscDocs', 'example']);

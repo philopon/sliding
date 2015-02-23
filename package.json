@@ -2,8 +2,11 @@
   "name": "sliding",
   "version": "0.1.0",
   "dependencies": {
+    "browser-sync": "^2.2.1",
     "gulp": "^3.8.11",
     "gulp-foreach": "^0.1.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-plumber": "^0.6.6",
     "gulp-purescript": "^0.1.2"
   }
 }
