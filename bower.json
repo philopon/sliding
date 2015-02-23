@@ -1,0 +1,24 @@
+{
+  "name": "sliding",
+  "version": "0.0.0",
+  "authors": [
+    "philopon <philopon.dependence@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "purescript-kefir": "~0.6.8",
+    "purescript-html": "~0.7.0",
+    "purescript-math": "~0.1.0",
+    "purescript-arrays": "~0.3.2",
+    "purescript-maybe": "~0.2.1",
+    "purescript-client-routing": "~0.1.2",
+    "purescript-globals": "~0.1.5"
+  }
+}
