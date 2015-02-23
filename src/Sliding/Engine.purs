@@ -137,7 +137,6 @@ slide size slides = do
 
   node <- getNode html
   click <- K.fromEvent node "click" id
-  K.onLog click
   clickPage <- K.sampledBy wSize click $ \ws cl ->
     if cl.target `equal` node
        then if or cl.offsetX cl.layerX > size.width / 2

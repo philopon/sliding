@@ -378,8 +378,8 @@ PS.Prelude = (function () {
     var $less = function (__dict_Ord_12) {
         return function (a1) {
             return function (a2) {
-                var _307 = compare(__dict_Ord_12)(a1)(a2);
-                if (_307 instanceof LT) {
+                var _166 = compare(__dict_Ord_12)(a1)(a2);
+                if (_166 instanceof LT) {
                     return true;
                 };
                 return false;
@@ -389,8 +389,8 @@ PS.Prelude = (function () {
     var $greater = function (__dict_Ord_14) {
         return function (a1) {
             return function (a2) {
-                var _308 = compare(__dict_Ord_14)(a1)(a2);
-                if (_308 instanceof GT) {
+                var _167 = compare(__dict_Ord_14)(a1)(a2);
+                if (_167 instanceof GT) {
                     return true;
                 };
                 return false;
@@ -400,8 +400,8 @@ PS.Prelude = (function () {
     var $greater$eq = function (__dict_Ord_15) {
         return function (a1) {
             return function (a2) {
-                var _309 = compare(__dict_Ord_15)(a1)(a2);
-                if (_309 instanceof LT) {
+                var _168 = compare(__dict_Ord_15)(a1)(a2);
+                if (_168 instanceof LT) {
                     return false;
                 };
                 return true;
@@ -5949,11 +5949,11 @@ PS.Data_Array = (function () {
             var isInt = function (n_1) {
                 return n_1 !== ~~n_1;
             };
-            var _325 = n < 0 || (n >= length(xs) || isInt(n));
-            if (_325) {
+            var _184 = n < 0 || (n >= length(xs) || isInt(n));
+            if (_184) {
                 return Data_Maybe.Nothing.value;
             };
-            if (!_325) {
+            if (!_184) {
                 return new Data_Maybe.Just(xs[n]);
             };
             throw new Error("Failed pattern match");
@@ -6149,7 +6149,7 @@ PS.Data_Array_Unsafe = (function () {
     var Data_Maybe_Unsafe = PS.Data_Maybe_Unsafe;
     var head = function (_128) {
         if (_128.length >= 1) {
-            var _328 = _128.slice(1);
+            var _187 = _128.slice(1);
             return _128[0];
         };
         throw new Error("Failed pattern match");
@@ -6226,13 +6226,6 @@ function onValueImpl(str, fn){
   }
 };
     
-function onLogImpl (stream) {
-  return function OnLogEff(){
-    stream.log();
-    return {};
-  }
-};
-    
 function toPropertyWithImpl(stream, v){
   return function ToPropertyWithEff(){
     return stream['toProperty'](v);
@@ -6305,7 +6298,6 @@ function mergeImpl(kefir, os) {
             return onValueImpl(s, f);
         };
     };
-    var onLog = onLogImpl;
     var merge = function (os) {
         return mergeImpl(FRP_Kefir_Foreign.kefir, os);
     };
@@ -6358,7 +6350,6 @@ function mergeImpl(kefir, os) {
         fromEvent: fromEvent, 
         fromEventE: fromEventE, 
         emitter: emitter, 
-        onLog: onLog, 
         forget: forget, 
         emit: emit, 
         onValue: onValue
@@ -6463,20 +6454,20 @@ function wrap2(f){
     var RoutingM = function (x) {
         return x;
     };
-    var $minus$div = function (_288) {
-        return function (_289) {
-            return Prelude[":"](unsafeCoerce(_288))(_289);
+    var $minus$div = function (_147) {
+        return function (_148) {
+            return Prelude[":"](unsafeCoerce(_147))(_148);
         };
     };
-    var $plus$div = function (_290) {
-        return function (_291) {
-            return Prelude[":"](unsafeCoerce(_290))(unsafeCoerce(_291));
+    var $plus$div = function (_149) {
+        return function (_150) {
+            return Prelude[":"](unsafeCoerce(_149))(unsafeCoerce(_150));
         };
     };
-    var runRouter = function (_285) {
+    var runRouter = function (_144) {
         return function __do() {
             var _10 = newRouter(Network_Routing_Client_Foreign.director)();
-            var _9 = _285({
+            var _9 = _144({
                 variableIndex: 0, 
                 routerInstance: _10, 
                 historyAPI: false, 
@@ -6505,23 +6496,23 @@ function wrap2(f){
         };
     };
     var regex = Regex.create;
-    var pathToString = function (_286) {
-        if (_286 instanceof Exact) {
-            return _286.value0;
+    var pathToString = function (_145) {
+        if (_145 instanceof Exact) {
+            return _145.value0;
         };
-        if (_286 instanceof Regex) {
-            return "(" + (_286.value0 + ")");
+        if (_145 instanceof Regex) {
+            return "(" + (_145.value0 + ")");
         };
-        if (_286 instanceof Param) {
-            return _286.value0;
+        if (_145 instanceof Param) {
+            return _145.value0;
         };
-        if (_286 instanceof Any) {
+        if (_145 instanceof Any) {
             return ":_";
         };
         throw new Error("Failed pattern match");
     };
-    var pathesToString = function (_287) {
-        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_287));
+    var pathesToString = function (_146) {
+        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_146));
     };
     var modifyState = function (f) {
         return RoutingM(function (s) {
@@ -6533,27 +6524,27 @@ function wrap2(f){
     };
     var notFound = function (m) {
         return modifyState(function (s) {
-            var _343 = {};
-            for (var _344 in s) {
-                if (s.hasOwnProperty(_344)) {
-                    _343[_344] = s[_344];
+            var _202 = {};
+            for (var _203 in s) {
+                if (s.hasOwnProperty(_203)) {
+                    _202[_203] = s[_203];
                 };
             };
-            _343.notFound = Data_Maybe.Just.create(function (s_1) {
+            _202.notFound = Data_Maybe.Just.create(function (s_1) {
                 return Prelude["void"](Control_Monad_Eff.functorEff)(m(s_1));
             });
-            return _343;
+            return _202;
         });
     };
     var succIndex = modifyState(function (s) {
-        var _345 = {};
-        for (var _346 in s) {
-            if (s.hasOwnProperty(_346)) {
-                _345[_346] = s[_346];
+        var _204 = {};
+        for (var _205 in s) {
+            if (s.hasOwnProperty(_205)) {
+                _204[_205] = s[_205];
             };
         };
-        _345.variableIndex = s.variableIndex + 1;
-        return _345;
+        _204.variableIndex = s.variableIndex + 1;
+        return _204;
     });
     var liftRoutingM = function (m) {
         return RoutingM(function (s) {
@@ -6572,13 +6563,13 @@ function wrap2(f){
             s: s
         });
     });
-    var functorRoutingM = new Prelude.Functor(function (_292) {
-        return function (_293) {
+    var functorRoutingM = new Prelude.Functor(function (_151) {
+        return function (_152) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var n = _293(s)();
+                    var n = _152(s)();
                     return {
-                        a: _292(n.a), 
+                        a: _151(n.a), 
                         s: n.s
                     };
                 };
@@ -6587,12 +6578,12 @@ function wrap2(f){
     });
     var exact = Exact.create;
     var empty = [  ];
-    var applyRoutingM = new Prelude.Apply(function (_294) {
-        return function (_295) {
+    var applyRoutingM = new Prelude.Apply(function (_153) {
+        return function (_154) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _6 = _294(s)();
-                    var _5 = _295(_6.s)();
+                    var _6 = _153(s)();
+                    var _5 = _154(_6.s)();
                     return {
                         a: _6.a(_5.a), 
                         s: _5.s
@@ -6603,12 +6594,12 @@ function wrap2(f){
     }, function () {
         return functorRoutingM;
     });
-    var bindRoutingM = new Prelude.Bind(function (_296) {
-        return function (_297) {
+    var bindRoutingM = new Prelude.Bind(function (_155) {
+        return function (_156) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _8 = _296(s)();
-                    var _7 = _297(_8.a);
+                    var _8 = _155(s)();
+                    var _7 = _156(_8.a);
                     return _7(_8.s)();
                 };
             });
@@ -6752,12 +6743,12 @@ function equalImpl(a, b){
     var Sliding = function (x) {
         return x;
     };
-    var slideNode = function (_302) {
-        return Data_Html.getNode(_302.html);
+    var slideNode = function (_161) {
+        return Data_Html.getNode(_161.html);
     };
     var setPage = function (p) {
         return function (s) {
-            return ModifyPage.create(function (_298) {
+            return ModifyPage.create(function (_157) {
                 return {
                     page: p, 
                     step: s
@@ -6765,14 +6756,14 @@ function equalImpl(a, b){
             });
         };
     };
-    var restrict = function (__dict_Ord_118) {
+    var restrict = function (__dict_Ord_75) {
         return function (mn) {
             return function (mx) {
                 return function (a) {
-                    if (Prelude["<"](__dict_Ord_118)(a)(mn)) {
+                    if (Prelude["<"](__dict_Ord_75)(a)(mn)) {
                         return mn;
                     };
-                    if (Prelude["<"](__dict_Ord_118)(mx)(a)) {
+                    if (Prelude["<"](__dict_Ord_75)(mx)(a)) {
                         return mx;
                     };
                     if (Prelude.otherwise) {
@@ -6848,28 +6839,28 @@ function equalImpl(a, b){
                 };
                 if (action instanceof ReSize) {
                     return Prelude["return"](Control_Monad_Eff.monadEff)((function () {
-                        var _364 = {};
-                        for (var _365 in state) {
-                            if (state.hasOwnProperty(_365)) {
-                                _364[_365] = state[_365];
+                        var _223 = {};
+                        for (var _224 in state) {
+                            if (state.hasOwnProperty(_224)) {
+                                _223[_224] = state[_224];
                             };
                         };
-                        _364.windowSize = action.value0;
-                        return _364;
+                        _223.windowSize = action.value0;
+                        return _223;
                     })());
                 };
                 if (action instanceof ModifyPage) {
                     var c$prime = rePage(slides)(action.value0(state.current));
                     return function __do() {
                         setHash("#/page/" + (Prelude.show(Prelude.showNumber)(c$prime.page + 1) + ("/" + Prelude.show(Prelude.showNumber)(c$prime.step + 1))))();
-                        var _367 = {};
-                        for (var _368 in state) {
-                            if (state.hasOwnProperty(_368)) {
-                                _367[_368] = state[_368];
+                        var _226 = {};
+                        for (var _227 in state) {
+                            if (state.hasOwnProperty(_227)) {
+                                _226[_227] = state[_227];
                             };
                         };
-                        _367.current = c$prime;
-                        return _367;
+                        _226.current = c$prime;
+                        return _226;
                     };
                 };
                 throw new Error("Failed pattern match");
@@ -6898,10 +6889,10 @@ function equalImpl(a, b){
             return equalImpl(a, b);
         };
     };
-    var elem = function (__dict_Eq_119) {
+    var elem = function (__dict_Eq_76) {
         return function (a) {
             return function (l) {
-                return Data_Array.elemIndex(__dict_Eq_119)(a)(l) >= 0;
+                return Data_Array.elemIndex(__dict_Eq_76)(a)(l) >= 0;
             };
         };
     };
@@ -6910,27 +6901,26 @@ function equalImpl(a, b){
             return function __do() {
                 var _26 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
                 var _25 = getWindowSize();
-                var _24 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_299) {
+                var _24 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_158) {
                     return getWindowSize;
                 }))(FRP_Kefir.toPropertyWith(_25))();
                 var _23 = FRP_Kefir.emitter();
                 var _22 = Data_Html.getNode(_26)();
                 var _21 = FRP_Kefir.fromEvent(_22)("click")(Prelude.id(Prelude.categoryArr))();
-                FRP_Kefir.onLog(_21)();
                 var _20 = FRP_Kefir.sampledBy(_24)(_21)(function (ws) {
                     return function (cl) {
-                        var _377 = equal(cl.target)(_22);
-                        if (_377) {
-                            var _378 = or(cl.offsetX)(cl.layerX) > (size.width / 2);
-                            if (_378) {
+                        var _236 = equal(cl.target)(_22);
+                        if (_236) {
+                            var _237 = or(cl.offsetX)(cl.layerX) > (size.width / 2);
+                            if (_237) {
                                 return nextStep;
                             };
-                            if (!_378) {
+                            if (!_237) {
                                 return prevStep;
                             };
                             throw new Error("Failed pattern match");
                         };
-                        if (!_377) {
+                        if (!_236) {
                             return NoOp.value;
                         };
                         throw new Error("Failed pattern match");
@@ -6945,12 +6935,12 @@ function equalImpl(a, b){
                         })();
                         var _18 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.filter(function (k) {
                             return elem(Prelude.eqNumber)(k)(nextKeys);
-                        })(_19))(FRP_Kefir.map(function (_300) {
+                        })(_19))(FRP_Kefir.map(function (_159) {
                             return nextStep;
                         }))();
                         var _17 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.filter(function (k) {
                             return elem(Prelude.eqNumber)(k)(prevKeys);
-                        })(_19))(FRP_Kefir.map(function (_301) {
+                        })(_19))(FRP_Kefir.map(function (_160) {
                             return prevStep;
                         }))();
                         var _16 = FRP_Kefir.map(ReSize.create)(_24)();
