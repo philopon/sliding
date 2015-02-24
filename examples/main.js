@@ -6750,6 +6750,30 @@ function getElementSize(e){
 function equalImpl(a, b){
   return a == b;
 };
+    
+function swipeEventImpl(action, duration, node){
+  return function(){
+    var touchStart;
+    var touchEnd;
+    var touchExceeded;
+
+    node.addEventListener('touchstart', function(e){
+      touchStart    = e.touches[0].pageX;
+      touchEnd      = touchStart;
+      touchExceeded = false;
+    });
+
+    node.addEventListener('touchmove', function(e){
+      touchEnd = e.changedTouches[0].pageX;
+      if(!touchExceeded && Math.abs(touchStart - touchEnd) > duration){
+        e.preventDefault();
+        (touchEnd - touchStart > 0)? action.left() : action.right();
+      }
+      touchExceeded = true;
+    });
+
+  }
+};
     var documentElement = document.documentElement;
     var ModifyPage = (function () {
         function ModifyPage(value0) {
@@ -6940,11 +6964,12 @@ function equalImpl(a, b){
             };
         };
     };
-    var defaultRenderConfig = {
+    var defaultSlideConfig = {
         size: {
             width: 800, 
             height: 600
         }, 
+        swipeDuration: 25, 
         pager: new Data_Maybe.Just(numIndicator)
     };
     var appendChild = function (p) {
@@ -6960,24 +6985,28 @@ function equalImpl(a, b){
         };
     };
     var slide = function (config) {
-        return function (node) {
+        return function (parent) {
             return function (slides) {
                 var slides$prime = Data_Array.filter(function (s) {
                     return !Data_Array["null"](s);
                 })(slides);
                 return function __do() {
                     var _23 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
-                    Prelude[">>="](Control_Monad_Eff.bindEff)(Data_Html.getNode(_23))(appendChild(node))();
-                    var _22 = getElementSize(node)();
-                    var _21 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_154) {
-                        return getElementSize(node);
-                    }))(FRP_Kefir.toPropertyWith(_22))();
-                    var _20 = FRP_Kefir.emitter();
-                    var _19 = Data_Html.getNode(_23)();
-                    var _18 = FRP_Kefir.fromEvent(_19)("click")(Prelude.id(Prelude.categoryArr))();
-                    var _17 = FRP_Kefir.sampledBy(_21)(_18)(function (ws) {
+                    var _22 = Data_Html.getNode(_23)();
+                    appendChild(parent)(_22)();
+                    var _21 = getElementSize(parent)();
+                    var _20 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_154) {
+                        return getElementSize(parent);
+                    }))(FRP_Kefir.toPropertyWith(_21))();
+                    var _19 = FRP_Kefir.emitter();
+                    swipeEventImpl({
+                        left: FRP_Kefir.emit(_19)(prevStep), 
+                        right: FRP_Kefir.emit(_19)(nextStep)
+                    }, config.swipeDuration, _22)();
+                    var _18 = FRP_Kefir.fromEvent(_22)("click")(Prelude.id(Prelude.categoryArr))();
+                    var _17 = FRP_Kefir.sampledBy(_20)(_18)(function (ws) {
                         return function (cl) {
-                            var _235 = equal(cl.target)(_19);
+                            var _235 = equal(cl.target)(_22);
                             if (_235) {
                                 var _236 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
                                 if (_236) {
@@ -7004,23 +7033,23 @@ function equalImpl(a, b){
                                     return toggleFullScreen;
                                 };
                                 if (_238 === 48) {
-                                    return FRP_Kefir.emit(_20)(setPage(0)(0));
+                                    return FRP_Kefir.emit(_19)(setPage(0)(0));
                                 };
                                 if (elem(Prelude.eqNumber)(_238)(nextKeys)) {
-                                    return FRP_Kefir.emit(_20)(nextStep);
+                                    return FRP_Kefir.emit(_19)(nextStep);
                                 };
                                 if (elem(Prelude.eqNumber)(_238)(prevKeys)) {
-                                    return FRP_Kefir.emit(_20)(prevStep);
+                                    return FRP_Kefir.emit(_19)(prevStep);
                                 };
                                 if (Prelude.otherwise) {
                                     return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
                                 };
                                 throw new Error("Failed pattern match");
                             })();
-                            var _16 = FRP_Kefir.map(ReSize.create)(_21)();
-                            var _15 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _16, FRP_Kefir.forget(_20), FRP_Kefir.forget(_17) ]))(FRP_Kefir.debounce(20))();
+                            var _16 = FRP_Kefir.map(ReSize.create)(_20)();
+                            var _15 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _16, FRP_Kefir.forget(_19), FRP_Kefir.forget(_17) ]))(FRP_Kefir.debounce(20))();
                             var _14 = FRP_Kefir.scanEff(update(_23)(slides$prime))({
-                                windowSize: _22, 
+                                windowSize: _21, 
                                 current: {
                                     page: 0, 
                                     step: 0
@@ -7032,7 +7061,7 @@ function equalImpl(a, b){
                             Network_Routing_Client.runRouter(Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.param(Network_Routing_Client.regex("[1-9][0-9]*")))(function (_13) {
                                 return Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.route2(Network_Routing_Client["-/"](Network_Routing_Client.exact("page"))(Network_Routing_Client["+/"](_13)(Network_Routing_Client["+/"](_13)(Network_Routing_Client.empty))))(function (p) {
                                     return function (s) {
-                                        return FRP_Kefir.emit(_20)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1));
+                                        return FRP_Kefir.emit(_19)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1));
                                     };
                                 }))(function () {
                                     return Network_Routing_Client.notFound(function (setRoute) {
@@ -7041,7 +7070,7 @@ function equalImpl(a, b){
                                 });
                             }))();
                             return {
-                                action: _20
+                                action: _19
                             };
                         };
                     })()();
@@ -7053,7 +7082,7 @@ function equalImpl(a, b){
         documentElement: documentElement, 
         slide: slide, 
         numIndicator: numIndicator, 
-        defaultRenderConfig: defaultRenderConfig
+        defaultSlideConfig: defaultSlideConfig
     };
 })();
 var PS = PS || {};
@@ -7065,7 +7094,7 @@ PS.Main = (function () {
     var DOM = PS.DOM;
     var Data_Html = PS.Data_Html;
     var Data_Html_Attributes_Html5 = PS.Data_Html_Attributes_Html5;
-    var main = Sliding_Engine.slide(Sliding_Engine.defaultRenderConfig)(Sliding_Engine.documentElement)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ] ]);
+    var main = Sliding_Engine.slide(Sliding_Engine.defaultSlideConfig)(Sliding_Engine.documentElement)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ] ]);
     return {
         main: main
     };

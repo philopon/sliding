@@ -7,7 +7,7 @@ import Data.Html
 import qualified Data.Html.Elements.Html5 as E
 import qualified Data.Html.Attributes.Html5 as A
 
-main = slide defaultRenderConfig documentElement
+main = slide defaultSlideConfig documentElement
   [ [ E.div [] [ E.h1 [] [E.text "Sliding"]
                , E.h2 [] [E.text "presentation library"]
                ]

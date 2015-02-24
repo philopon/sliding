@@ -16,17 +16,17 @@ type Indicator = Size -> [[VTree]] -> State -> VTree
 ```
 
 
-#### `RenderConfig`
+#### `SlideConfig`
 
 ``` purescript
-type RenderConfig = { pager :: Maybe Indicator, size :: Size }
+type SlideConfig = { pager :: Maybe Indicator, swipeDuration :: Number, size :: Size }
 ```
 
 
-#### `defaultRenderConfig`
+#### `defaultSlideConfig`
 
 ``` purescript
-defaultRenderConfig :: RenderConfig
+defaultSlideConfig :: SlideConfig
 ```
 
 
@@ -47,7 +47,7 @@ newtype Sliding eff
 #### `slide`
 
 ``` purescript
-slide :: RenderConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
+slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
 ```
 
 

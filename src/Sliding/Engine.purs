@@ -1,7 +1,7 @@
 module Sliding.Engine
   ( Size(), Sliding()
-  , RenderConfig()
-  , defaultRenderConfig
+  , SlideConfig()
+  , defaultSlideConfig
   , Indicator()
   , numIndicator
   , slide
@@ -12,7 +12,7 @@ import Global
 import Data.Maybe(Maybe(..), fromMaybe, maybe)
 import Data.Array((!!), length, elemIndex, filter, null)
 import qualified Data.Array.Unsafe as U
-import Math(max, min)
+import Math(abs, max, min)
 import Control.Monad.Eff
 import DOM(DOM(), Node(..))
 import Data.Html
@@ -104,14 +104,16 @@ function getElementSize(e){
 
 type Indicator = Size -> [[VTree]] -> State -> VTree
 
-type RenderConfig =
-  { size    :: Size
-  , pager   :: Maybe Indicator
+type SlideConfig =
+  { size          :: Size
+  , swipeDuration :: Number
+  , pager         :: Maybe Indicator
   }
 
-defaultRenderConfig :: RenderConfig
-defaultRenderConfig =
+defaultSlideConfig :: SlideConfig
+defaultSlideConfig =
   { size: {width: 800, height: 600}
+  , swipeDuration: 25
   , pager: Just numIndicator
   }
 
@@ -130,7 +132,7 @@ numIndicator _ slides state = E.div
   ]
 
 
-render :: RenderConfig -> [[VTree]] -> State -> VTree
+render :: SlideConfig -> [[VTree]] -> State -> VTree
 render config slides state =
   let scale = min
         (state.windowSize.height / config.size.height)
@@ -191,18 +193,45 @@ function equalImpl(a, b){
 equal :: forall a. a -> a -> Boolean
 equal a b = runFn2 equalImpl a b
 
-slide :: RenderConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
-slide config node slides = do
+foreign import swipeEventImpl """
+function swipeEventImpl(action, duration, node){
+  return function(){
+    var touchStart;
+    var touchEnd;
+    var touchExceeded;
+
+    node.addEventListener('touchstart', function(e){
+      touchStart    = e.touches[0].pageX;
+      touchEnd      = touchStart;
+      touchExceeded = false;
+    });
+
+    node.addEventListener('touchmove', function(e){
+      touchEnd = e.changedTouches[0].pageX;
+      if(!touchExceeded && Math.abs(touchStart - touchEnd) > duration){
+        e.preventDefault();
+        (touchEnd - touchStart > 0)? action.left() : action.right();
+      }
+      touchExceeded = true;
+    });
+
+  }
+}""" :: forall e f. Fn3 {left :: f, right:: f} Number Node (Eff e Unit)
+
+slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
+slide config parent slides = do
   let slides' = filter (\s -> not $ null s) slides
   html   <- createElement $ E.div [] []
-  getNode html >>= appendChild node
+  node <- getNode html
+  appendChild parent node
 
-  wSize0 <- getElementSize node
-  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getElementSize node)
+  wSize0 <- getElementSize parent
+  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getElementSize parent)
     >>= K.toPropertyWith wSize0
   action <- K.emitter
 
-  node <- getNode html
+  runFn3 swipeEventImpl {left: K.emit action prevStep, right: K.emit action nextStep} config.swipeDuration node
+
   click <- K.fromEvent node "click" id
   clickPage <- K.sampledBy wSize click $ \ws cl ->
     if cl.target `equal` node
