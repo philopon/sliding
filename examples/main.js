@@ -339,8 +339,8 @@ PS.Prelude = (function () {
     };
     var moduloSemiringNumber = new ModuloSemiring(numDiv, function () {
         return semiringNumber;
-    }, function (_31) {
-        return function (_32) {
+    }, function (_30) {
+        return function (_31) {
             return 0;
         };
     });
@@ -362,9 +362,9 @@ PS.Prelude = (function () {
     /**
      *  | Returns its first argument and ignores its second.
      */
-    var $$const = function (_25) {
-        return function (_26) {
-            return _25;
+    var $$const = function (_24) {
+        return function (_25) {
+            return _24;
         };
     };
     var $$void = function (__dict_Functor_10) {
@@ -381,8 +381,8 @@ PS.Prelude = (function () {
     var $less = function (__dict_Ord_12) {
         return function (a1) {
             return function (a2) {
-                var _164 = compare(__dict_Ord_12)(a1)(a2);
-                if (_164 instanceof LT) {
+                var _162 = compare(__dict_Ord_12)(a1)(a2);
+                if (_162 instanceof LT) {
                     return true;
                 };
                 return false;
@@ -392,8 +392,8 @@ PS.Prelude = (function () {
     var $greater = function (__dict_Ord_14) {
         return function (a1) {
             return function (a2) {
-                var _165 = compare(__dict_Ord_14)(a1)(a2);
-                if (_165 instanceof GT) {
+                var _163 = compare(__dict_Ord_14)(a1)(a2);
+                if (_163 instanceof GT) {
                     return true;
                 };
                 return false;
@@ -403,8 +403,8 @@ PS.Prelude = (function () {
     var $greater$eq = function (__dict_Ord_15) {
         return function (a1) {
             return function (a2) {
-                var _166 = compare(__dict_Ord_15)(a1)(a2);
-                if (_166 instanceof LT) {
+                var _164 = compare(__dict_Ord_15)(a1)(a2);
+                if (_164 instanceof LT) {
                     return false;
                 };
                 return true;
@@ -5875,23 +5875,23 @@ PS.Data_Maybe = (function () {
         };
         return Just;
     })();
-    var maybe = function (_83) {
-        return function (_84) {
-            return function (_85) {
-                if (_85 instanceof Nothing) {
-                    return _83;
+    var maybe = function (_82) {
+        return function (_83) {
+            return function (_84) {
+                if (_84 instanceof Nothing) {
+                    return _82;
                 };
-                if (_85 instanceof Just) {
-                    return _84(_85.value0);
+                if (_84 instanceof Just) {
+                    return _83(_84.value0);
                 };
                 throw new Error("Failed pattern match");
             };
         };
     };
-    var functorMaybe = new Prelude.Functor(function (_86) {
-        return function (_87) {
-            if (_87 instanceof Just) {
-                return new Just(_86(_87.value0));
+    var functorMaybe = new Prelude.Functor(function (_85) {
+        return function (_86) {
+            if (_86 instanceof Just) {
+                return new Just(_85(_86.value0));
             };
             return Nothing.value;
         };
@@ -5899,12 +5899,12 @@ PS.Data_Maybe = (function () {
     var fromMaybe = function (a) {
         return maybe(a)(Prelude.id(Prelude.categoryArr));
     };
-    var applyMaybe = new Prelude.Apply(function (_88) {
-        return function (_89) {
-            if (_88 instanceof Just) {
-                return Prelude["<$>"](functorMaybe)(_88.value0)(_89);
+    var applyMaybe = new Prelude.Apply(function (_87) {
+        return function (_88) {
+            if (_87 instanceof Just) {
+                return Prelude["<$>"](functorMaybe)(_87.value0)(_88);
             };
-            if (_88 instanceof Nothing) {
+            if (_87 instanceof Nothing) {
                 return Nothing.value;
             };
             throw new Error("Failed pattern match");
@@ -5912,12 +5912,12 @@ PS.Data_Maybe = (function () {
     }, function () {
         return functorMaybe;
     });
-    var bindMaybe = new Prelude.Bind(function (_92) {
-        return function (_93) {
-            if (_92 instanceof Just) {
-                return _93(_92.value0);
+    var bindMaybe = new Prelude.Bind(function (_91) {
+        return function (_92) {
+            if (_91 instanceof Just) {
+                return _92(_91.value0);
             };
-            if (_92 instanceof Nothing) {
+            if (_91 instanceof Nothing) {
                 return Nothing.value;
             };
             throw new Error("Failed pattern match");
@@ -5954,18 +5954,18 @@ PS.Data_Array = (function () {
             var isInt = function (n_1) {
                 return n_1 !== ~~n_1;
             };
-            var _182 = n < 0 || (n >= length(xs) || isInt(n));
-            if (_182) {
+            var _180 = n < 0 || (n >= length(xs) || isInt(n));
+            if (_180) {
                 return Data_Maybe.Nothing.value;
             };
-            if (!_182) {
+            if (!_180) {
                 return new Data_Maybe.Just(xs[n]);
             };
             throw new Error("Failed pattern match");
         };
     };
-    var $$null = function (_107) {
-        if (_107.length === 0) {
+    var $$null = function (_106) {
+        if (_106.length === 0) {
             return true;
         };
         return false;
@@ -6160,10 +6160,10 @@ PS.Data_Array_Unsafe = (function () {
     var Prelude = PS.Prelude;
     var Data_Array = PS.Data_Array;
     var Data_Maybe_Unsafe = PS.Data_Maybe_Unsafe;
-    var head = function (_125) {
-        if (_125.length >= 1) {
-            var _186 = _125.slice(1);
-            return _125[0];
+    var head = function (_124) {
+        if (_124.length >= 1) {
+            var _184 = _124.slice(1);
+            return _124[0];
         };
         throw new Error("Failed pattern match");
     };
@@ -6455,20 +6455,20 @@ function wrap2(f){
     var RoutingM = function (x) {
         return x;
     };
-    var $minus$div = function (_144) {
-        return function (_145) {
-            return Prelude[":"](unsafeCoerce(_144))(_145);
+    var $minus$div = function (_143) {
+        return function (_144) {
+            return Prelude[":"](unsafeCoerce(_143))(_144);
         };
     };
-    var $plus$div = function (_146) {
-        return function (_147) {
-            return Prelude[":"](unsafeCoerce(_146))(unsafeCoerce(_147));
+    var $plus$div = function (_145) {
+        return function (_146) {
+            return Prelude[":"](unsafeCoerce(_145))(unsafeCoerce(_146));
         };
     };
-    var runRouter = function (_141) {
+    var runRouter = function (_140) {
         return function __do() {
             var _10 = newRouter(Network_Routing_Client_Foreign.director)();
-            var _9 = _141({
+            var _9 = _140({
                 variableIndex: 0, 
                 routerInstance: _10, 
                 historyAPI: false, 
@@ -6497,23 +6497,23 @@ function wrap2(f){
         };
     };
     var regex = Regex.create;
-    var pathToString = function (_142) {
-        if (_142 instanceof Exact) {
-            return _142.value0;
+    var pathToString = function (_141) {
+        if (_141 instanceof Exact) {
+            return _141.value0;
         };
-        if (_142 instanceof Regex) {
-            return "(" + (_142.value0 + ")");
+        if (_141 instanceof Regex) {
+            return "(" + (_141.value0 + ")");
         };
-        if (_142 instanceof Param) {
-            return _142.value0;
+        if (_141 instanceof Param) {
+            return _141.value0;
         };
-        if (_142 instanceof Any) {
+        if (_141 instanceof Any) {
             return ":_";
         };
         throw new Error("Failed pattern match");
     };
-    var pathesToString = function (_143) {
-        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_143));
+    var pathesToString = function (_142) {
+        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_142));
     };
     var modifyState = function (f) {
         return RoutingM(function (s) {
@@ -6525,27 +6525,27 @@ function wrap2(f){
     };
     var notFound = function (m) {
         return modifyState(function (s) {
-            var _201 = {};
-            for (var _202 in s) {
-                if (s.hasOwnProperty(_202)) {
-                    _201[_202] = s[_202];
+            var _199 = {};
+            for (var _200 in s) {
+                if (s.hasOwnProperty(_200)) {
+                    _199[_200] = s[_200];
                 };
             };
-            _201.notFound = Data_Maybe.Just.create(function (s_1) {
+            _199.notFound = Data_Maybe.Just.create(function (s_1) {
                 return Prelude["void"](Control_Monad_Eff.functorEff)(m(s_1));
             });
-            return _201;
+            return _199;
         });
     };
     var succIndex = modifyState(function (s) {
-        var _203 = {};
-        for (var _204 in s) {
-            if (s.hasOwnProperty(_204)) {
-                _203[_204] = s[_204];
+        var _201 = {};
+        for (var _202 in s) {
+            if (s.hasOwnProperty(_202)) {
+                _201[_202] = s[_202];
             };
         };
-        _203.variableIndex = s.variableIndex + 1;
-        return _203;
+        _201.variableIndex = s.variableIndex + 1;
+        return _201;
     });
     var liftRoutingM = function (m) {
         return RoutingM(function (s) {
@@ -6564,13 +6564,13 @@ function wrap2(f){
             s: s
         });
     });
-    var functorRoutingM = new Prelude.Functor(function (_148) {
-        return function (_149) {
+    var functorRoutingM = new Prelude.Functor(function (_147) {
+        return function (_148) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var n = _149(s)();
+                    var n = _148(s)();
                     return {
-                        a: _148(n.a), 
+                        a: _147(n.a), 
                         s: n.s
                     };
                 };
@@ -6579,12 +6579,12 @@ function wrap2(f){
     });
     var exact = Exact.create;
     var empty = [  ];
-    var applyRoutingM = new Prelude.Apply(function (_150) {
-        return function (_151) {
+    var applyRoutingM = new Prelude.Apply(function (_149) {
+        return function (_150) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _6 = _150(s)();
-                    var _5 = _151(_6.s)();
+                    var _6 = _149(s)();
+                    var _5 = _150(_6.s)();
                     return {
                         a: _6.a(_5.a), 
                         s: _5.s
@@ -6595,12 +6595,12 @@ function wrap2(f){
     }, function () {
         return functorRoutingM;
     });
-    var bindRoutingM = new Prelude.Bind(function (_152) {
-        return function (_153) {
+    var bindRoutingM = new Prelude.Bind(function (_151) {
+        return function (_152) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _8 = _152(s)();
-                    var _7 = _153(_8.a);
+                    var _8 = _151(s)();
+                    var _7 = _152(_8.a);
                     return _7(_8.s)();
                 };
             });
@@ -6690,6 +6690,13 @@ PS.Sliding_Engine = (function () {
     var Data_Html_Events_Normal = PS.Data_Html_Events_Normal;
     var browerWindow = window;
     
+function appendChildImpl(p, c){
+  return function(){
+    p.appendChild(c);
+    return {};
+  }
+};
+    
 function addEventListenerImpl(tgt, nm, cb){
   return function(){
     var f = function(e){return cb(e)();}
@@ -6731,21 +6738,19 @@ function orImpl(a, b){
   return a || b;
 };
     
-function getWindowSize(){
-  var w = window,
-      d = document,
-      e = d.documentElement,
-      g = d.getElementsByTagName('body')[0];
-  return {
-    width:  w.innerWidth  || e.clientWidth  || g.clientWidth,
-    height: w.innerHeight || e.clientHeight || g.clientHeight
-  };
-}
-;
+function getElementSize(e){
+  return function(){
+    return {
+      width: e.clientWidth,
+      height: e.clientHeight
+    }
+  }
+};
     
 function equalImpl(a, b){
   return a == b;
 };
+    var documentElement = document.documentElement;
     var ModifyPage = (function () {
         function ModifyPage(value0) {
             this.value0 = value0;
@@ -6774,12 +6779,9 @@ function equalImpl(a, b){
     var Sliding = function (x) {
         return x;
     };
-    var slideNode = function (_159) {
-        return Data_Html.getNode(_159.html);
-    };
     var setPage = function (p) {
         return function (s) {
-            return ModifyPage.create(function (_154) {
+            return ModifyPage.create(function (_153) {
                 return {
                     page: p, 
                     step: s
@@ -6869,28 +6871,28 @@ function equalImpl(a, b){
                     };
                     if (action instanceof ReSize) {
                         return Prelude["return"](Control_Monad_Eff.monadEff)((function () {
-                            var _222 = {};
-                            for (var _223 in state) {
-                                if (state.hasOwnProperty(_223)) {
-                                    _222[_223] = state[_223];
+                            var _219 = {};
+                            for (var _220 in state) {
+                                if (state.hasOwnProperty(_220)) {
+                                    _219[_220] = state[_220];
                                 };
                             };
-                            _222.windowSize = action.value0;
-                            return _222;
+                            _219.windowSize = action.value0;
+                            return _219;
                         })());
                     };
                     if (action instanceof ModifyPage) {
                         var c$prime = rePage(slides)(action.value0(state.current));
                         return function __do() {
                             setHash("#/page/" + (Prelude.show(Prelude.showNumber)(c$prime.page + 1) + ("/" + Prelude.show(Prelude.showNumber)(c$prime.step + 1))))();
-                            var _225 = {};
-                            for (var _226 in state) {
-                                if (state.hasOwnProperty(_226)) {
-                                    _225[_226] = state[_226];
+                            var _222 = {};
+                            for (var _223 in state) {
+                                if (state.hasOwnProperty(_223)) {
+                                    _222[_223] = state[_223];
                                 };
                             };
-                            _225.current = c$prime;
-                            return _225;
+                            _222.current = c$prime;
+                            return _222;
                         };
                     };
                     throw new Error("Failed pattern match");
@@ -6909,14 +6911,14 @@ function equalImpl(a, b){
             return orImpl(a, b);
         };
     };
-    var numIndicator = function (_156) {
-        return function (_157) {
-            return function (_158) {
+    var numIndicator = function (_155) {
+        return function (_156) {
+            return function (_157) {
                 return Data_Html_Elements_Html5.div([ Data_Html_Attributes_Html5.class_("page-number"), Data_Html_Attributes_Html5.style({
                     position: "absolute", 
                     bottom: "10px", 
                     right: "10px"
-                }) ])([ Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("current") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(_158.current.page + 1)) ]), Data_Html_Elements_Html5.span([  ])([ Data_Html_Elements_Html5.text("/") ]), Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("all") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(Data_Array.length(_157))) ]) ]);
+                }) ])([ Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("current") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(_157.current.page + 1)) ]), Data_Html_Elements_Html5.span([  ])([ Data_Html_Elements_Html5.text("/") ]), Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("all") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(Data_Array.length(_156))) ]) ]);
             };
         };
     };
@@ -6945,6 +6947,11 @@ function equalImpl(a, b){
         }, 
         pager: new Data_Maybe.Just(numIndicator)
     };
+    var appendChild = function (p) {
+        return function (c) {
+            return appendChildImpl(p, c);
+        };
+    };
     var addEventListener = function (n) {
         return function (s) {
             return function (m) {
@@ -6953,92 +6960,97 @@ function equalImpl(a, b){
         };
     };
     var slide = function (config) {
-        return function (slides) {
-            var slides$prime = Data_Array.filter(function (s) {
-                return !Data_Array["null"](s);
-            })(slides);
-            return function __do() {
-                var _23 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
-                var _22 = getWindowSize();
-                var _21 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_155) {
-                    return getWindowSize;
-                }))(FRP_Kefir.toPropertyWith(_22))();
-                var _20 = FRP_Kefir.emitter();
-                var _19 = Data_Html.getNode(_23)();
-                var _18 = FRP_Kefir.fromEvent(_19)("click")(Prelude.id(Prelude.categoryArr))();
-                var _17 = FRP_Kefir.sampledBy(_21)(_18)(function (ws) {
-                    return function (cl) {
-                        var _238 = equal(cl.target)(_19);
-                        if (_238) {
-                            var _239 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
-                            if (_239) {
-                                return nextStep;
-                            };
-                            if (!_239) {
-                                return prevStep;
-                            };
-                            throw new Error("Failed pattern match");
-                        };
-                        if (!_238) {
-                            return NoOp.value;
-                        };
-                        throw new Error("Failed pattern match");
-                    };
-                })();
-                return (function () {
-                    var prevKeys = [ 38, 37, 75 ];
-                    var nextKeys = [ 32, 13, 40, 39, 74 ];
-                    return function __do() {
-                        addEventListener(browerWindow)("keydown")(function (e) {
-                            var _241 = or(e.which)(e.keyCode);
-                            if (_241 === 70) {
-                                return toggleFullScreen;
-                            };
-                            if (elem(Prelude.eqNumber)(_241)(nextKeys)) {
-                                return FRP_Kefir.emit(_20)(nextStep);
-                            };
-                            if (elem(Prelude.eqNumber)(_241)(prevKeys)) {
-                                return FRP_Kefir.emit(_20)(prevStep);
-                            };
-                            if (Prelude.otherwise) {
-                                return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
-                            };
-                            throw new Error("Failed pattern match");
-                        })();
-                        var _16 = FRP_Kefir.map(ReSize.create)(_21)();
-                        var _15 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _16, FRP_Kefir.forget(_20), FRP_Kefir.forget(_17) ]))(FRP_Kefir.debounce(20))();
-                        var _14 = FRP_Kefir.scanEff(update(_23)(slides$prime))({
-                            windowSize: _22, 
-                            current: {
-                                page: 0, 
-                                step: 0
-                            }
-                        })(_15)();
-                        FRP_Kefir.onValue(_14)(function (st) {
-                            return Data_Html.patch(render(config)(slides$prime)(st))(_23);
-                        })();
-                        Network_Routing_Client.runRouter(Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.param(Network_Routing_Client.regex("[1-9][0-9]*")))(function (_13) {
-                            return Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.route2(Network_Routing_Client["-/"](Network_Routing_Client.exact("page"))(Network_Routing_Client["+/"](_13)(Network_Routing_Client["+/"](_13)(Network_Routing_Client.empty))))(function (p) {
-                                return function (s) {
-                                    return FRP_Kefir.emit(_20)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1));
+        return function (node) {
+            return function (slides) {
+                var slides$prime = Data_Array.filter(function (s) {
+                    return !Data_Array["null"](s);
+                })(slides);
+                return function __do() {
+                    var _23 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
+                    Prelude[">>="](Control_Monad_Eff.bindEff)(Data_Html.getNode(_23))(appendChild(node))();
+                    var _22 = getElementSize(node)();
+                    var _21 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_154) {
+                        return getElementSize(node);
+                    }))(FRP_Kefir.toPropertyWith(_22))();
+                    var _20 = FRP_Kefir.emitter();
+                    var _19 = Data_Html.getNode(_23)();
+                    var _18 = FRP_Kefir.fromEvent(_19)("click")(Prelude.id(Prelude.categoryArr))();
+                    var _17 = FRP_Kefir.sampledBy(_21)(_18)(function (ws) {
+                        return function (cl) {
+                            var _235 = equal(cl.target)(_19);
+                            if (_235) {
+                                var _236 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
+                                if (_236) {
+                                    return nextStep;
                                 };
-                            }))(function () {
-                                return Network_Routing_Client.notFound(function (setRoute) {
-                                    return setRoute("/page/1/1");
-                                });
-                            });
-                        }))();
-                        return {
-                            html: _23, 
-                            action: _20
+                                if (!_236) {
+                                    return prevStep;
+                                };
+                                throw new Error("Failed pattern match");
+                            };
+                            if (!_235) {
+                                return NoOp.value;
+                            };
+                            throw new Error("Failed pattern match");
                         };
-                    };
-                })()();
+                    })();
+                    return (function () {
+                        var prevKeys = [ 38, 37, 75 ];
+                        var nextKeys = [ 32, 13, 40, 39, 74 ];
+                        return function __do() {
+                            addEventListener(browerWindow)("keydown")(function (e) {
+                                var _238 = or(e.which)(e.keyCode);
+                                if (_238 === 70) {
+                                    return toggleFullScreen;
+                                };
+                                if (_238 === 48) {
+                                    return FRP_Kefir.emit(_20)(setPage(0)(0));
+                                };
+                                if (elem(Prelude.eqNumber)(_238)(nextKeys)) {
+                                    return FRP_Kefir.emit(_20)(nextStep);
+                                };
+                                if (elem(Prelude.eqNumber)(_238)(prevKeys)) {
+                                    return FRP_Kefir.emit(_20)(prevStep);
+                                };
+                                if (Prelude.otherwise) {
+                                    return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
+                                };
+                                throw new Error("Failed pattern match");
+                            })();
+                            var _16 = FRP_Kefir.map(ReSize.create)(_21)();
+                            var _15 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _16, FRP_Kefir.forget(_20), FRP_Kefir.forget(_17) ]))(FRP_Kefir.debounce(20))();
+                            var _14 = FRP_Kefir.scanEff(update(_23)(slides$prime))({
+                                windowSize: _22, 
+                                current: {
+                                    page: 0, 
+                                    step: 0
+                                }
+                            })(_15)();
+                            FRP_Kefir.onValue(_14)(function (st) {
+                                return Data_Html.patch(render(config)(slides$prime)(st))(_23);
+                            })();
+                            Network_Routing_Client.runRouter(Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.param(Network_Routing_Client.regex("[1-9][0-9]*")))(function (_13) {
+                                return Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.route2(Network_Routing_Client["-/"](Network_Routing_Client.exact("page"))(Network_Routing_Client["+/"](_13)(Network_Routing_Client["+/"](_13)(Network_Routing_Client.empty))))(function (p) {
+                                    return function (s) {
+                                        return FRP_Kefir.emit(_20)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1));
+                                    };
+                                }))(function () {
+                                    return Network_Routing_Client.notFound(function (setRoute) {
+                                        return setRoute("/page/1/1");
+                                    });
+                                });
+                            }))();
+                            return {
+                                action: _20
+                            };
+                        };
+                    })()();
+                };
             };
         };
     };
     return {
-        slideNode: slideNode, 
+        documentElement: documentElement, 
         slide: slide, 
         numIndicator: numIndicator, 
         defaultRenderConfig: defaultRenderConfig
@@ -7047,26 +7059,15 @@ function equalImpl(a, b){
 var PS = PS || {};
 PS.Main = (function () {
     "use strict";
-    var Prelude = PS.Prelude;
     var Sliding_Engine = PS.Sliding_Engine;
     var Data_Html_Elements_Html5 = PS.Data_Html_Elements_Html5;
+    var Prelude = PS.Prelude;
     var DOM = PS.DOM;
     var Data_Html = PS.Data_Html;
     var Data_Html_Attributes_Html5 = PS.Data_Html_Attributes_Html5;
-    var Control_Monad_Eff = PS.Control_Monad_Eff;
-    
-function appendBody (e) {
-  return function appendBodyEff(){
-    document.body.appendChild(e);
-  }
-};
-    var main = function __do() {
-        var _24 = Sliding_Engine.slide(Sliding_Engine.defaultRenderConfig)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ] ])();
-        return Prelude[">>="](Control_Monad_Eff.bindEff)(Sliding_Engine.slideNode(_24))(appendBody)();
-    };
+    var main = Sliding_Engine.slide(Sliding_Engine.defaultRenderConfig)(Sliding_Engine.documentElement)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ] ]);
     return {
-        main: main, 
-        appendBody: appendBody
+        main: main
     };
 })();
 PS.Main.main();

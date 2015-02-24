@@ -47,14 +47,14 @@ newtype Sliding eff
 #### `slide`
 
 ``` purescript
-slide :: RenderConfig -> [[VTree]] -> Eff _ (Sliding _)
+slide :: RenderConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
 ```
 
 
-#### `slideNode`
+#### `documentElement`
 
 ``` purescript
-slideNode :: Sliding _ -> EffHtml _ Node
+documentElement :: Node
 ```
 
 

@@ -5,7 +5,7 @@ module Sliding.Engine
   , Indicator()
   , numIndicator
   , slide
-  , slideNode
+  , documentElement
   ) where
 
 import Global
@@ -24,6 +24,17 @@ import Data.Function
 import qualified FRP.Kefir as K
 
 foreign import browerWindow "var browerWindow = window" :: Node
+
+foreign import appendChildImpl """
+function appendChildImpl(p, c){
+  return function(){
+    p.appendChild(c);
+    return {};
+  }
+}""" :: forall e. Fn2 Node Node (Eff e Unit)
+
+appendChild :: Node -> Node -> Eff _ Unit
+appendChild p c = runFn2 appendChildImpl p c
 
 foreign import addEventListenerImpl """
 function addEventListenerImpl(tgt, nm, cb){
@@ -81,18 +92,15 @@ type Size =
   , height :: Number
   }
 
-foreign import getWindowSize """
-function getWindowSize(){
-  var w = window,
-      d = document,
-      e = d.documentElement,
-      g = d.getElementsByTagName('body')[0];
-  return {
-    width:  w.innerWidth  || e.clientWidth  || g.clientWidth,
-    height: w.innerHeight || e.clientHeight || g.clientHeight
-  };
-}
-""" :: forall e. Eff e Size
+foreign import getElementSize """
+function getElementSize(e){
+  return function(){
+    return {
+      width: e.clientWidth,
+      height: e.clientHeight
+    }
+  }
+}""" :: forall e. Node -> Eff e Size
 
 type Indicator = Size -> [[VTree]] -> State -> VTree
 
@@ -148,8 +156,7 @@ render config slides state =
     maybe [] (\p -> [p config.size slides state]) config.pager
 
 newtype Sliding eff = Sliding
-  { html   :: Html
-  , action :: K.Stream (K.Emit ()) (K.All ()) eff Action
+  { action :: K.Stream (K.Emit ()) (K.All ()) eff Action
   }
 
 type Current =
@@ -184,12 +191,14 @@ function equalImpl(a, b){
 equal :: forall a. a -> a -> Boolean
 equal a b = runFn2 equalImpl a b
 
-slide :: RenderConfig -> [[VTree]] -> Eff _ (Sliding _)
-slide config slides = do
+slide :: RenderConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
+slide config node slides = do
   let slides' = filter (\s -> not $ null s) slides
   html   <- createElement $ E.div [] []
-  wSize0 <- getWindowSize
-  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getWindowSize)
+  getNode html >>= appendChild node
+
+  wSize0 <- getElementSize node
+  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getElementSize node)
     >>= K.toPropertyWith wSize0
   action <- K.emitter
 
@@ -214,7 +223,8 @@ slide config slides = do
                  ]
  
   addEventListener browerWindow "keydown" $ \e -> case or e.which e.keyCode of
-    70 -> toggleFullScreen
+    70 {- f -} -> toggleFullScreen
+    48 {- 0 -} -> K.emit action $ setPage 0 0
     k | k `elem` nextKeys -> K.emit action nextStep
       | k `elem` prevKeys -> K.emit action prevStep
       | otherwise         -> return unit
@@ -236,10 +246,7 @@ slide config slides = do
 
     notFound $ \setRoute -> setRoute "/page/1/1"
 
-  return $ Sliding
-    { html: html
-    , action: action
-    }
+  return $ Sliding { action: action }
 
 update :: Html -> [[VTree]] -> State -> Action -> Eff _ State
 update html slides state action = case action of
@@ -271,5 +278,4 @@ restrict mn mx a = case unit of
 elem :: forall a. (Eq a) => a -> [a] -> Boolean
 elem a l = elemIndex a l >= 0
 
-slideNode :: Sliding _ -> EffHtml _ Node
-slideNode (Sliding s) = getNode s.html
+foreign import documentElement "var documentElement = document.documentElement" :: Node
