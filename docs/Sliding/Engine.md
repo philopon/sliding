@@ -9,6 +9,34 @@ type Size = { height :: Number, width :: Number }
 ```
 
 
+#### `Indicator`
+
+``` purescript
+type Indicator = Size -> [[VTree]] -> State -> VTree
+```
+
+
+#### `RenderConfig`
+
+``` purescript
+type RenderConfig = { pager :: Maybe Indicator, size :: Size }
+```
+
+
+#### `defaultRenderConfig`
+
+``` purescript
+defaultRenderConfig :: RenderConfig
+```
+
+
+#### `numIndicator`
+
+``` purescript
+numIndicator :: Indicator
+```
+
+
 #### `Sliding`
 
 ``` purescript
@@ -19,7 +47,7 @@ newtype Sliding eff
 #### `slide`
 
 ``` purescript
-slide :: Size -> [[VTree]] -> Eff _ (Sliding _)
+slide :: RenderConfig -> [[VTree]] -> Eff _ (Sliding _)
 ```
 
 

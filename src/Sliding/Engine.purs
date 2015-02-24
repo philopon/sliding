@@ -1,10 +1,16 @@
 module Sliding.Engine
-  ( Size(), Sliding(), slide, slideNode
+  ( Size(), Sliding()
+  , RenderConfig()
+  , defaultRenderConfig
+  , Indicator()
+  , numIndicator
+  , slide
+  , slideNode
   ) where
 
 import Global
-import Data.Maybe(fromMaybe, maybe)
-import Data.Array((!!), length, elemIndex)
+import Data.Maybe(Maybe(..), fromMaybe, maybe)
+import Data.Array((!!), length, elemIndex, filter, null)
 import qualified Data.Array.Unsafe as U
 import Math(max, min)
 import Control.Monad.Eff
@@ -18,6 +24,41 @@ import Data.Function
 import qualified FRP.Kefir as K
 
 foreign import browerWindow "var browerWindow = window" :: Node
+
+foreign import addEventListenerImpl """
+function addEventListenerImpl(tgt, nm, cb){
+  return function(){
+    var f = function(e){return cb(e)();}
+    tgt.addEventListener(nm, f);
+    return {}
+  }
+}""" :: forall e eff. Fn3 Node String (e -> Eff eff Unit) (Eff eff Unit)
+
+addEventListener :: forall e. Node -> String -> (_ -> Eff e Unit) -> Eff e Unit
+addEventListener n s m = runFn3 addEventListenerImpl n s m
+
+foreign import toggleFullScreen """
+// https://developer.mozilla.org/ja/docs/Web/Guide/DOM/Using_full_screen_mode#Toggling_fullscreen_mode
+function toggleFullScreen() {
+  if ((document.fullScreenElement && document.fullScreenElement !== null) ||    // alternative standard method
+      (!document.mozFullScreen && !document.webkitIsFullScreen)) {              // current working methods
+    if (document.documentElement.requestFullScreen) {
+      document.documentElement.requestFullScreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullScreen) {
+      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.cancelFullScreen) {
+      document.cancelFullScreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitCancelFullScreen) {
+      document.webkitCancelFullScreen();
+    }
+  }
+}""" :: forall e. Eff e Unit
 
 foreign import setHash """
 function setHash(s){
@@ -53,42 +94,58 @@ function getWindowSize(){
 }
 """ :: forall e. Eff e Size
 
-render :: Size -> [[VTree]] -> State -> VTree
-render size slides state =
+type Indicator = Size -> [[VTree]] -> State -> VTree
+
+type RenderConfig =
+  { size    :: Size
+  , pager   :: Maybe Indicator
+  }
+
+defaultRenderConfig :: RenderConfig
+defaultRenderConfig =
+  { size: {width: 800, height: 600}
+  , pager: Just numIndicator
+  }
+
+numIndicator :: Indicator 
+numIndicator _ slides state = E.div
+  [ A.class_ "page-number"
+  , A.style
+      { position: "absolute"
+      , bottom: "10px"
+      , right: "10px"
+      }
+  ]
+  [ E.span [A.class_ "current"] [E.text $ show $ state.current.page + 1]
+  , E.span [] [E.text "/"]
+  , E.span [A.class_ "all"] [E.text $ show $ length slides]
+  ]
+
+
+render :: RenderConfig -> [[VTree]] -> State -> VTree
+render config slides state =
   let scale = min
-        (state.windowSize.height / size.height)
-        (state.windowSize.width  / size.width)
+        (state.windowSize.height / config.size.height)
+        (state.windowSize.width  / config.size.width)
       transform = "translate(-50%, -50%) scale(" ++ show scale ++ ")"
   in E.div
     [ A.style
         { position: "absolute"
         , left: "50%"
         , top:  "50%"
-        , width: show size.width ++ "px"
-        , height: show size.height ++ "px"
-        , boxShadow: "0 0 15px rgba(0,0,0,0.4)"
+        , width: show config.size.width ++ "px"
+        , height: show config.size.height ++ "px"
+
         , transform: transform
-        , "-webkit-transform": transform
-        , "-ms-transform": transform
         , "-moz-transform": transform
+        , "-webkit-transform": transform
+        , "-o-transform": transform
+        , "-ms-transform": transform
         }
     , A.class_ "slide-wrapper"
-    ]
-    [ fromMaybe (U.head $ U.head slides) $
-        slides !! state.current.page >>= \s -> s !! state.current.step
-    , E.div
-        [ A.class_ "page-number"
-        , A.style
-            { position: "absolute"
-            , bottom: "10px"
-            , right: "10px"
-            }
-        ]
-        [ E.span [A.class_ "current"] [E.text $ show $ state.current.page + 1]
-        , E.span [] [E.text "/"]
-        , E.span [A.class_ "all"] [E.text $ show $ length slides]
-        ]
-    ]
+    ] $
+    fromMaybe (U.head $ U.head slides) (slides !! state.current.page >>= \s -> s !! state.current.step) :
+    maybe [] (\p -> [p config.size slides state]) config.pager
 
 newtype Sliding eff = Sliding
   { html   :: Html
@@ -127,8 +184,9 @@ function equalImpl(a, b){
 equal :: forall a. a -> a -> Boolean
 equal a b = runFn2 equalImpl a b
 
-slide :: Size -> [[VTree]] -> Eff _ (Sliding _)
-slide size slides = do
+slide :: RenderConfig -> [[VTree]] -> Eff _ (Sliding _)
+slide config slides = do
+  let slides' = filter (\s -> not $ null s) slides
   html   <- createElement $ E.div [] []
   wSize0 <- getWindowSize
   wSize  <- K.fromEventE browerWindow "resize" (\_ -> getWindowSize)
@@ -139,7 +197,7 @@ slide size slides = do
   click <- K.fromEvent node "click" id
   clickPage <- K.sampledBy wSize click $ \ws cl ->
     if cl.target `equal` node
-       then if or cl.offsetX cl.layerX > size.width / 2
+       then if or cl.offsetX cl.layerX > config.size.width / 2
             then nextStep
             else prevStep
        else NoOp
@@ -155,19 +213,21 @@ slide size slides = do
                  , 75 -- k
                  ]
  
-  keyEvent <- K.fromEvent browerWindow "keydown" (\e -> or e.which e.keyCode)
-  nextKey <- K.filter (\k -> k `elem` nextKeys) keyEvent >>= K.map (\_ -> nextStep)
-  prevKey <- K.filter (\k -> k `elem` prevKeys) keyEvent >>= K.map (\_ -> prevStep)
+  addEventListener browerWindow "keydown" $ \e -> case or e.which e.keyCode of
+    70 -> toggleFullScreen
+    k | k `elem` nextKeys -> K.emit action nextStep
+      | k `elem` prevKeys -> K.emit action prevStep
+      | otherwise         -> return unit
 
   resize <- K.map ReSize wSize
-  merged <- K.merge [resize, K.forget action, nextKey, prevKey, K.forget clickPage]
+  merged <- K.merge [resize, K.forget action, K.forget clickPage]
     >>= K.debounce 20
 
-  state  <- K.scanEff (update slides)
+  state  <- K.scanEff (update html slides')
     {windowSize: wSize0, current: {page: 0, step: 0}} merged
 
   K.onValue state $ \st ->
-    patch (render size slides st) html
+    patch (render config slides' st) html
 
   runRouter $ do
     num <- param $ regex "[1-9][0-9]*"
@@ -181,8 +241,8 @@ slide size slides = do
     , action: action
     }
 
-update :: forall eff. [[VTree]] -> State -> Action -> EffRouting eff State
-update slides state action = case action of
+update :: Html -> [[VTree]] -> State -> Action -> Eff _ State
+update html slides state action = case action of
   NoOp         -> return state
   ReSize size  -> return $ state { windowSize = size }
   ModifyPage f -> do

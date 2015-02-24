@@ -1,4 +1,15 @@
 .slide-wrapper {
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  -webkit-box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  -o-box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  -ms-box-shadow: 0 0 15px rgba(0,0,0,0.4);
+
+  padding: 15px;
+
   box-sizing: border-box;
-  padding: 20px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  -ms-box-sizing: border-box;
 }
