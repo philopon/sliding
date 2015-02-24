@@ -113,7 +113,7 @@ type SlideConfig =
 defaultSlideConfig :: SlideConfig
 defaultSlideConfig =
   { size: {width: 800, height: 600}
-  , swipeDuration: 25
+  , swipeDuration: 150
   , pager: Just numIndicator
   }
 
@@ -208,12 +208,22 @@ function swipeEventImpl(action, duration, node){
 
     node.addEventListener('touchmove', function(e){
       touchEnd = e.changedTouches[0].pageX;
-      if(!touchExceeded && Math.abs(touchStart - touchEnd) > duration){
+      if(!touchExceeded && e.changedTouches.length == 1 && Math.abs(touchStart - touchEnd) > 30){
         e.preventDefault();
-        (touchEnd - touchStart > 0)? action.left() : action.right();
+        touchExceeded = true;
       }
-      touchExceeded = true;
     });
+    
+    node.addEventListener('touchend', function(){
+      if(touchExceeded){
+        console.log(touchEnd - touchStart);
+        if(touchEnd - touchStart > duration){
+          action.left();
+        } else if (touchEnd - touchStart < -duration){
+          action.right();
+        }
+      }
+    })
 
   }
 }""" :: forall e f. Fn3 {left :: f, right:: f} Number Node (Eff e Unit)
