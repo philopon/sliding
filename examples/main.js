@@ -6761,19 +6761,19 @@ function equalImpl(a, b){
     
 function swipeEventImpl(action, duration, node){
   return function(){
-    var touchStart;
-    var touchEnd;
-    var touchExceeded;
+    var touchStart, touchEnd, touchExceeded, multiTouched;
 
     node.addEventListener('touchstart', function(e){
       touchStart    = e.touches[0].pageX;
       touchEnd      = touchStart;
       touchExceeded = false;
+      multiTouched  = e.touches.length > 1;
     });
 
     node.addEventListener('touchmove', function(e){
       touchEnd = e.changedTouches[0].pageX;
-      if(!touchExceeded && e.changedTouches.length == 1 && Math.abs(touchStart - touchEnd) > 30){
+      multiTouched = !multiTouched && e.changedTouches.length > 1
+      if(!touchExceeded && !multiTouched && Math.abs(touchStart - touchEnd) > 30){
         e.preventDefault();
         touchExceeded = true;
       }
