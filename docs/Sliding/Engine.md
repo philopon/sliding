@@ -2,6 +2,13 @@
 
 ## Module Sliding.Engine
 
+#### `documentElement`
+
+``` purescript
+documentElement :: Node
+```
+
+
 #### `Size`
 
 ``` purescript
@@ -40,21 +47,14 @@ numIndicator :: Indicator
 #### `Sliding`
 
 ``` purescript
-newtype Sliding eff
+newtype Sliding
 ```
 
 
 #### `slide`
 
 ``` purescript
-slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
-```
-
-
-#### `documentElement`
-
-``` purescript
-documentElement :: Node
+slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ Sliding
 ```
 
 

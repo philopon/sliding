@@ -24,6 +24,7 @@ import Data.Function
 import qualified FRP.Kefir as K
 
 foreign import browerWindow "var browerWindow = window" :: Node
+foreign import documentElement "var documentElement = document.documentElement" :: Node
 
 foreign import appendChildImpl """
 function appendChildImpl(p, c){
@@ -157,8 +158,8 @@ render config slides state =
     fromMaybe (U.head $ U.head slides) (slides !! state.current.page >>= \s -> s !! state.current.step) :
     maybe [] (\p -> [p config.size slides state]) config.pager
 
-newtype Sliding eff = Sliding
-  { action :: K.Stream (K.Emit ()) (K.All ()) eff Action
+newtype Sliding = Sliding
+  { action :: K.Stream (K.Emit ()) (K.All ()) Unit Action
   }
 
 type Current =
@@ -170,20 +171,6 @@ type State =
   { windowSize :: Size
   , current    :: Current
   }
-
-data Action
-  = ModifyPage (Current -> Current)
-  | ReSize Size
-  | NoOp
-
-setPage :: Number -> Number -> Action
-setPage p s = ModifyPage $ \_ -> {page: p, step: s}
-
-nextStep :: Action
-nextStep  = ModifyPage $ \p -> {page: p.page, step: p.step + 1}
-
-prevStep :: Action
-prevStep  = ModifyPage $ \p -> {page: p.page, step: p.step - 1}
 
 foreign import equalImpl """
 function equalImpl(a, b){
@@ -228,20 +215,28 @@ function swipeEventImpl(action, duration, node){
   }
 }""" :: forall e f. Fn3 {left :: f, right:: f} Number Node (Eff e Unit)
 
-slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ (Sliding _)
-slide config parent slides = do
-  let slides' = filter (\s -> not $ null s) slides
+slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ Sliding
+slide config parent slides0 = do
+  let slides = filter (\s -> not $ null s) slides0
+
+  -- elements
   html   <- createElement $ E.div [] []
   node <- getNode html
   appendChild parent node
 
+  -- action emitter
+  action <- K.emitter
+
+  -- window resize events
   wSize0 <- getElementSize parent
   wSize  <- K.fromEventE browerWindow "resize" (\_ -> getElementSize parent)
     >>= K.toPropertyWith wSize0
-  action <- K.emitter
+  resize <- K.map ReSize wSize
 
+  -- swipe events
   runFn3 swipeEventImpl {left: K.emit action prevStep, right: K.emit action nextStep} config.swipeDuration node
 
+  -- click events
   click <- K.fromEvent node "click" id
   clickPage <- K.sampledBy wSize click $ \ws cl ->
     if cl.target `equal` node
@@ -250,6 +245,7 @@ slide config parent slides = do
             else prevStep
        else NoOp
 
+  -- keyboard events
   let nextKeys = [ 32 -- space
                  , 13 -- enter
                  , 40 -- arrow down
@@ -268,16 +264,19 @@ slide config parent slides = do
       | k `elem` prevKeys -> K.emit action prevStep
       | otherwise         -> return unit
 
-  resize <- K.map ReSize wSize
+  -- all events
   merged <- K.merge [resize, K.forget action, K.forget clickPage]
     >>= K.debounce 20
 
-  state  <- K.scanEff (update html slides')
+  -- state
+  state  <- K.scanEff (update html slides)
     {windowSize: wSize0, current: {page: 0, step: 0}} merged
 
+  -- execute FRP
   K.onValue state $ \st ->
-    patch (render config slides' st) html
+    patch (render config slides st) html
 
+  -- URI router
   runRouter $ do
     num <- param $ regex "[1-9][0-9]*"
     route2 (exact "page" -/ num  +/ num +/ empty) $ \p s -> do
@@ -286,6 +285,20 @@ slide config parent slides = do
     notFound $ \setRoute -> setRoute "/page/1/1"
 
   return $ Sliding { action: action }
+
+data Action
+  = ModifyPage (Current -> Current)
+  | ReSize Size
+  | NoOp
+
+setPage :: Number -> Number -> Action
+setPage p s = ModifyPage $ \_ -> {page: p, step: s}
+
+nextStep :: Action
+nextStep  = ModifyPage $ \p -> {page: p.page, step: p.step + 1}
+
+prevStep :: Action
+prevStep  = ModifyPage $ \p -> {page: p.page, step: p.step - 1}
 
 update :: Html -> [[VTree]] -> State -> Action -> Eff _ State
 update html slides state action = case action of
@@ -316,5 +329,3 @@ restrict mn mx a = case unit of
 
 elem :: forall a. (Eq a) => a -> [a] -> Boolean
 elem a l = elemIndex a l >= 0
-
-foreign import documentElement "var documentElement = document.documentElement" :: Node
