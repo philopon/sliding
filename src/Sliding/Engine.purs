@@ -5,7 +5,7 @@ module Sliding.Engine
   , Indicator()
   , numIndicator
   , slide
-  , documentElement
+  , body
   ) where
 
 import Global
@@ -24,7 +24,7 @@ import Data.Function
 import qualified FRP.Kefir as K
 
 foreign import browerWindow "var browerWindow = window" :: Node
-foreign import documentElement "var documentElement = document.documentElement" :: Node
+foreign import body "var body = document.body" :: Node
 
 foreign import appendChildImpl """
 function appendChildImpl(p, c){
@@ -93,6 +93,18 @@ type Size =
   , height :: Number
   }
 
+foreign import getWindowSize """
+function getWindowSize(){
+  var w = window,
+  d = document,
+  e = d.documentElement,
+  g = d.getElementsByTagName('body')[0];
+  return {
+    width: w.innerWidth || e.clientWidth || g.clientWidth,
+    height: w.innerHeight || e.clientHeight || g.clientHeight
+  };
+}""" :: forall e. Eff e Size
+
 foreign import getElementSize """
 function getElementSize(e){
   return function(){
@@ -102,6 +114,9 @@ function getElementSize(e){
     }
   }
 }""" :: forall e. Node -> Eff e Size
+
+getSize :: Node -> Eff _ Size
+getSize e = if e `equal` body then getWindowSize else getElementSize e
 
 type Indicator = Size -> [[VTree]] -> State -> VTree
 
@@ -131,7 +146,6 @@ numIndicator _ slides state = E.div
   , E.span [] [E.text "/"]
   , E.span [A.class_ "all"] [E.text $ show $ length slides]
   ]
-
 
 render :: SlideConfig -> [[VTree]] -> State -> VTree
 render config slides state =
@@ -228,8 +242,8 @@ slide config parent slides0 = do
   action <- K.emitter
 
   -- window resize events
-  wSize0 <- getElementSize parent
-  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getElementSize parent)
+  wSize0 <- getSize parent
+  wSize  <- K.fromEventE browerWindow "resize" (\_ -> getSize parent)
     >>= K.toPropertyWith wSize0
   resize <- K.map ReSize wSize
 

@@ -2,10 +2,10 @@
 
 ## Module Sliding.Engine
 
-#### `documentElement`
+#### `body`
 
 ``` purescript
-documentElement :: Node
+body :: Node
 ```
 
 

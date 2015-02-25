@@ -6697,7 +6697,7 @@ PS.Sliding_Engine = (function () {
     var DOM = PS.DOM;
     var Data_Html_Events_Normal = PS.Data_Html_Events_Normal;
     var browerWindow = window;
-    var documentElement = document.documentElement;
+    var body = document.body;
     
 function appendChildImpl(p, c){
   return function(){
@@ -6745,6 +6745,17 @@ function setHash(s){
     
 function orImpl(a, b){
   return a || b;
+};
+    
+function getWindowSize(){
+  var w = window,
+  d = document,
+  e = d.documentElement,
+  g = d.getElementsByTagName('body')[0];
+  return {
+    width: w.innerWidth || e.clientWidth || g.clientWidth,
+    height: w.innerHeight || e.clientHeight || g.clientHeight
+  };
 };
     
 function getElementSize(e){
@@ -6975,6 +6986,16 @@ function swipeEventImpl(action, duration, node){
             return equalImpl(a, b);
         };
     };
+    var getSize = function (e) {
+        var _228 = equal(e)(body);
+        if (_228) {
+            return getWindowSize;
+        };
+        if (!_228) {
+            return getElementSize(e);
+        };
+        throw new Error("Failed pattern match");
+    };
     var elem = function (__dict_Eq_76) {
         return function (a) {
             return function (l) {
@@ -7013,9 +7034,9 @@ function swipeEventImpl(action, duration, node){
                     var _22 = Data_Html.getNode(_23)();
                     appendChild(parent)(_22)();
                     var _21 = FRP_Kefir.emitter();
-                    var _20 = getElementSize(parent)();
+                    var _20 = getSize(parent)();
                     var _19 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_153) {
-                        return getElementSize(parent);
+                        return getSize(parent);
                     }))(FRP_Kefir.toPropertyWith(_20))();
                     var _18 = FRP_Kefir.map(ReSize.create)(_19)();
                     swipeEventImpl({
@@ -7025,18 +7046,18 @@ function swipeEventImpl(action, duration, node){
                     var _17 = FRP_Kefir.fromEvent(_22)("click")(Prelude.id(Prelude.categoryArr))();
                     var _16 = FRP_Kefir.sampledBy(_19)(_17)(function (ws) {
                         return function (cl) {
-                            var _236 = equal(cl.target)(_22);
-                            if (_236) {
-                                var _237 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
-                                if (_237) {
+                            var _237 = equal(cl.target)(_22);
+                            if (_237) {
+                                var _238 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
+                                if (_238) {
                                     return nextStep;
                                 };
-                                if (!_237) {
+                                if (!_238) {
                                     return prevStep;
                                 };
                                 throw new Error("Failed pattern match");
                             };
-                            if (!_236) {
+                            if (!_237) {
                                 return NoOp.value;
                             };
                             throw new Error("Failed pattern match");
@@ -7047,17 +7068,17 @@ function swipeEventImpl(action, duration, node){
                         var nextKeys = [ 32, 13, 40, 39, 74 ];
                         return function __do() {
                             addEventListener(browerWindow)("keydown")(function (e) {
-                                var _239 = or(e.which)(e.keyCode);
-                                if (_239 === 70) {
+                                var _240 = or(e.which)(e.keyCode);
+                                if (_240 === 70) {
                                     return toggleFullScreen;
                                 };
-                                if (_239 === 48) {
+                                if (_240 === 48) {
                                     return FRP_Kefir.emit(_21)(setPage(0)(0));
                                 };
-                                if (elem(Prelude.eqNumber)(_239)(nextKeys)) {
+                                if (elem(Prelude.eqNumber)(_240)(nextKeys)) {
                                     return FRP_Kefir.emit(_21)(nextStep);
                                 };
-                                if (elem(Prelude.eqNumber)(_239)(prevKeys)) {
+                                if (elem(Prelude.eqNumber)(_240)(prevKeys)) {
                                     return FRP_Kefir.emit(_21)(prevStep);
                                 };
                                 if (Prelude.otherwise) {
@@ -7097,7 +7118,7 @@ function swipeEventImpl(action, duration, node){
         };
     };
     return {
-        documentElement: documentElement, 
+        body: body, 
         slide: slide, 
         numIndicator: numIndicator, 
         defaultSlideConfig: defaultSlideConfig
@@ -7112,7 +7133,7 @@ PS.Main = (function () {
     var Prelude = PS.Prelude;
     var DOM = PS.DOM;
     var Data_Html = PS.Data_Html;
-    var main = Sliding_Engine.slide(Sliding_Engine.defaultSlideConfig)(Sliding_Engine.documentElement)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("purescript presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("project URL") ]), Data_Html_Elements_Html5.a([ Data_Html_Attributes_Html5.href("http://github.com/philopon/sliding") ])([ Data_Html_Elements_Html5.text("github") ]) ]) ] ]);
+    var main = Sliding_Engine.slide(Sliding_Engine.defaultSlideConfig)(Sliding_Engine.body)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("purescript presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("project URL") ]), Data_Html_Elements_Html5.a([ Data_Html_Attributes_Html5.href("http://github.com/philopon/sliding") ])([ Data_Html_Elements_Html5.text("github") ]) ]) ] ]);
     return {
         main: main
     };
