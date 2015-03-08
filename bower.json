@@ -14,11 +14,12 @@
   ],
   "dependencies": {
     "purescript-kefir": "~0.6.9",
-    "purescript-html": "~0.9.0",
+    "purescript-html": "~0.10.0",
     "purescript-math": "~0.1.0",
     "purescript-arrays": "~0.3.2",
     "purescript-maybe": "~0.2.1",
-    "purescript-client-routing": "~0.1.2",
-    "purescript-globals": "~0.1.5"
+    "purescript-client-routing": "~0.3.0",
+    "purescript-globals": "~0.1.5",
+    "purescript-refs": "~0.1.2"
   }
 }

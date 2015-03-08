@@ -339,8 +339,8 @@ PS.Prelude = (function () {
     };
     var moduloSemiringNumber = new ModuloSemiring(numDiv, function () {
         return semiringNumber;
-    }, function (_30) {
-        return function (_31) {
+    }, function (_60) {
+        return function (_61) {
             return 0;
         };
     });
@@ -358,20 +358,6 @@ PS.Prelude = (function () {
     var ordNumber = new Ord(function () {
         return eqNumber;
     }, unsafeCompare);
-    
-    /**
-     *  | Returns its first argument and ignores its second.
-     */
-    var $$const = function (_24) {
-        return function (_25) {
-            return _24;
-        };
-    };
-    var $$void = function (__dict_Functor_10) {
-        return function (fa) {
-            return $less$dollar$greater(__dict_Functor_10)($$const(unit))(fa);
-        };
-    };
     var complement = function (dict) {
         return dict.complement;
     };
@@ -381,8 +367,8 @@ PS.Prelude = (function () {
     var $less = function (__dict_Ord_12) {
         return function (a1) {
             return function (a2) {
-                var _162 = compare(__dict_Ord_12)(a1)(a2);
-                if (_162 instanceof LT) {
+                var _522 = compare(__dict_Ord_12)(a1)(a2);
+                if (_522 instanceof LT) {
                     return true;
                 };
                 return false;
@@ -392,8 +378,8 @@ PS.Prelude = (function () {
     var $greater = function (__dict_Ord_14) {
         return function (a1) {
             return function (a2) {
-                var _163 = compare(__dict_Ord_14)(a1)(a2);
-                if (_163 instanceof GT) {
+                var _523 = compare(__dict_Ord_14)(a1)(a2);
+                if (_523 instanceof GT) {
                     return true;
                 };
                 return false;
@@ -403,8 +389,8 @@ PS.Prelude = (function () {
     var $greater$eq = function (__dict_Ord_15) {
         return function (a1) {
             return function (a2) {
-                var _164 = compare(__dict_Ord_15)(a1)(a2);
-                if (_164 instanceof LT) {
+                var _524 = compare(__dict_Ord_15)(a1)(a2);
+                if (_524 instanceof LT) {
                     return false;
                 };
                 return true;
@@ -473,14 +459,12 @@ PS.Prelude = (function () {
         liftA1: liftA1, 
         pure: pure, 
         "<*>": $less$times$greater, 
-        "void": $$void, 
         "<$>": $less$dollar$greater, 
         show: show, 
         cons: cons, 
         ":": $colon, 
         "$": $dollar, 
         id: id, 
-        "const": $$const, 
         otherwise: otherwise, 
         semigroupoidArr: semigroupoidArr, 
         categoryArr: categoryArr, 
@@ -519,8 +503,8 @@ var director = (function(exports){
 
 
 //
-// Generated on Sat Dec 06 2014 16:08:09 GMT-0500 (EST) by Charlie Robbins, Paolo Fragomeni & the Contributors (Using Codesurgeon).
-// Version 1.2.4
+// Generated on Tue Dec 16 2014 12:13:47 GMT+0100 (CET) by Charlie Robbins, Paolo Fragomeni & the Contributors (Using Codesurgeon).
+// Version 1.2.6
 //
 
 (function (exports) {
@@ -859,7 +843,7 @@ function paramifyString(str, params, mod) {
       }
     }
   }
-  return mod === str ? "([._a-zA-Z0-9-]+)" : mod;
+  return mod === str ? "([._a-zA-Z0-9-%()]+)" : mod;
 }
 
 function regifyString(str, params) {
@@ -4071,7 +4055,7 @@ var virtualDOM =
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = "1"
+	module.exports = "2"
 
 
 /***/ },
@@ -4798,7 +4782,7 @@ var virtualDOM =
 	        var parentNode = domNode.parentNode
 	        newNode = render(vText, renderOptions)
 
-	        if (parentNode) {
+	        if (parentNode && newNode !== domNode) {
 	            parentNode.replaceChild(newNode, domNode)
 	        }
 	    }
@@ -4833,7 +4817,7 @@ var virtualDOM =
 	    var parentNode = domNode.parentNode
 	    var newNode = render(vNode, renderOptions)
 
-	    if (parentNode) {
+	    if (parentNode && newNode !== domNode) {
 	        parentNode.replaceChild(newNode, domNode)
 	    }
 
@@ -4846,64 +4830,33 @@ var virtualDOM =
 	    }
 	}
 
-	function reorderChildren(domNode, bIndex) {
-	    var children = []
+	function reorderChildren(domNode, moves) {
 	    var childNodes = domNode.childNodes
-	    var len = childNodes.length
-	    var i
-	    var reverseIndex = bIndex.reverse
+	    var keyMap = {}
+	    var node
+	    var remove
+	    var insert
 
-	    for (i = 0; i < len; i++) {
-	        children.push(domNode.childNodes[i])
+	    for (var i = 0; i < moves.removes.length; i++) {
+	        remove = moves.removes[i]
+	        node = childNodes[remove.from]
+	        if (remove.key) {
+	            keyMap[remove.key] = node
+	        }
+	        domNode.removeChild(node)
 	    }
 
-	    var insertOffset = 0
-	    var move
-	    var node
-	    var insertNode
-	    var chainLength
-	    var insertedLength
-	    var nextSibling
-	    for (i = 0; i < len;) {
-	        move = bIndex[i]
-	        chainLength = 1
-	        if (move !== undefined && move !== i) {
-	            // try to bring forward as long of a chain as possible
-	            while (bIndex[i + chainLength] === move + chainLength) {
-	                chainLength++;
-	            }
-
-	            // the element currently at this index will be moved later so increase the insert offset
-	            if (reverseIndex[i] > i + chainLength) {
-	                insertOffset++
-	            }
-
-	            node = children[move]
-	            insertNode = childNodes[i + insertOffset] || null
-	            insertedLength = 0
-	            while (node !== insertNode && insertedLength++ < chainLength) {
-	                domNode.insertBefore(node, insertNode);
-	                node = children[move + insertedLength];
-	            }
-
-	            // the moved element came from the front of the array so reduce the insert offset
-	            if (move + chainLength < i) {
-	                insertOffset--
-	            }
-	        }
-
-	        // element at this index is scheduled to be removed so increase insert offset
-	        if (i in bIndex.removes) {
-	            insertOffset++
-	        }
-
-	        i += chainLength
+	    var length = childNodes.length
+	    for (var j = 0; j < moves.inserts.length; j++) {
+	        insert = moves.inserts[j]
+	        node = keyMap[insert.key]
+	        // this is the weirdest bug i've ever seen in webkit
+	        domNode.insertBefore(node, insert.to >= length++ ? null : childNodes[insert.to])
 	    }
 	}
 
 	function replaceRoot(oldRoot, newRoot) {
 	    if (oldRoot && newRoot && oldRoot !== newRoot && oldRoot.parentNode) {
-	        console.log(oldRoot)
 	        oldRoot.parentNode.replaceChild(newRoot, oldRoot)
 	    }
 
@@ -5485,7 +5438,7 @@ var virtualDOM =
 	        }
 	    } else if (isWidget(b)) {
 	        if (!isWidget(a)) {
-	            applyClear = true;
+	            applyClear = true
 	        }
 
 	        apply = appendPatch(apply, new VPatch(VPatch.WIDGET, a, b))
@@ -5502,7 +5455,8 @@ var virtualDOM =
 
 	function diffChildren(a, b, patch, apply, index) {
 	    var aChildren = a.children
-	    var bChildren = reorder(aChildren, b.children)
+	    var orderedSet = reorder(aChildren, b.children)
+	    var bChildren = orderedSet.children
 
 	    var aLen = aChildren.length
 	    var bLen = bChildren.length
@@ -5528,9 +5482,13 @@ var virtualDOM =
 	        }
 	    }
 
-	    if (bChildren.moves) {
+	    if (orderedSet.moves) {
 	        // Reorder nodes last
-	        apply = appendPatch(apply, new VPatch(VPatch.ORDER, a, bChildren.moves))
+	        apply = appendPatch(apply, new VPatch(
+	            VPatch.ORDER,
+	            a,
+	            orderedSet.moves
+	        ))
 	    }
 
 	    return apply
@@ -5572,7 +5530,7 @@ var virtualDOM =
 
 	// Create a sub-patch for thunks
 	function thunks(a, b, patch, index) {
-	    var nodes = handleThunk(a, b);
+	    var nodes = handleThunk(a, b)
 	    var thunkPatch = diff(nodes.a, nodes.b)
 	    if (hasPatches(thunkPatch)) {
 	        patch[index] = new VPatch(VPatch.THUNK, null, thunkPatch)
@@ -5582,11 +5540,11 @@ var virtualDOM =
 	function hasPatches(patch) {
 	    for (var index in patch) {
 	        if (index !== "a") {
-	            return true;
+	            return true
 	        }
 	    }
 
-	    return false;
+	    return false
 	}
 
 	// Execute hooks when two nodes are identical
@@ -5634,97 +5592,196 @@ var virtualDOM =
 
 	// List diff, naive left to right reordering
 	function reorder(aChildren, bChildren) {
+	    // O(M) time, O(M) memory
+	    var bChildIndex = keyIndex(bChildren)
+	    var bKeys = bChildIndex.keys
+	    var bFree = bChildIndex.free
 
-	    var bKeys = keyIndex(bChildren)
-
-	    if (!bKeys) {
-	        return bChildren
+	    if (bFree.length === bChildren.length) {
+	        return {
+	            children: bChildren,
+	            moves: null
+	        }
 	    }
 
-	    var aKeys = keyIndex(aChildren)
+	    // O(N) time, O(N) memory
+	    var aChildIndex = keyIndex(aChildren)
+	    var aKeys = aChildIndex.keys
+	    var aFree = aChildIndex.free
 
-	    if (!aKeys) {
-	        return bChildren
+	    if (aFree.length === aChildren.length) {
+	        return {
+	            children: bChildren,
+	            moves: null
+	        }
 	    }
 
-	    var bMatch = {}, aMatch = {}
+	    // O(MAX(N, M)) memory
+	    var newChildren = []
 
-	    for (var aKey in bKeys) {
-	        bMatch[bKeys[aKey]] = aKeys[aKey]
-	    }
-
-	    for (var bKey in aKeys) {
-	        aMatch[aKeys[bKey]] = bKeys[bKey]
-	    }
-
-	    var aLen = aChildren.length
-	    var bLen = bChildren.length
-	    var len = aLen > bLen ? aLen : bLen
-	    var shuffle = []
 	    var freeIndex = 0
-	    var i = 0
-	    var moveIndex = 0
-	    var moves = {}
-	    var removes = moves.removes = {}
-	    var reverse = moves.reverse = {}
-	    var hasMoves = false
+	    var freeCount = bFree.length
+	    var deletedItems = 0
 
-	    while (freeIndex < len) {
-	        var move = aMatch[i]
-	        if (move !== undefined) {
-	            shuffle[i] = bChildren[move]
-	            if (move !== moveIndex) {
-	                moves[move] = moveIndex
-	                reverse[moveIndex] = move
-	                hasMoves = true
+	    // Iterate through a and match a node in b
+	    // O(N) time,
+	    for (var i = 0 ; i < aChildren.length; i++) {
+	        var aItem = aChildren[i]
+	        var itemIndex
+
+	        if (aItem.key) {
+	            if (bKeys.hasOwnProperty(aItem.key)) {
+	                // Match up the old keys
+	                itemIndex = bKeys[aItem.key]
+	                newChildren.push(bChildren[itemIndex])
+
+	            } else {
+	                // Remove old keyed items
+	                itemIndex = i - deletedItems++
+	                newChildren.push(null)
 	            }
-	            moveIndex++
-	        } else if (i in aMatch) {
-	            shuffle[i] = undefined
-	            removes[i] = moveIndex++
-	            hasMoves = true
 	        } else {
-	            while (bMatch[freeIndex] !== undefined) {
-	                freeIndex++
-	            }
-
-	            if (freeIndex < len) {
-	                var freeChild = bChildren[freeIndex]
-	                if (freeChild) {
-	                    shuffle[i] = freeChild
-	                    if (freeIndex !== moveIndex) {
-	                        hasMoves = true
-	                        moves[freeIndex] = moveIndex
-	                        reverse[moveIndex] = freeIndex
-	                    }
-	                    moveIndex++
-	                }
-	                freeIndex++
+	            // Match the item in a with the next free item in b
+	            if (freeIndex < freeCount) {
+	                itemIndex = bFree[freeIndex++]
+	                newChildren.push(bChildren[itemIndex])
+	            } else {
+	                // There are no free items in b to match with
+	                // the free items in a, so the extra free nodes
+	                // are deleted.
+	                itemIndex = i - deletedItems++
+	                newChildren.push(null)
 	            }
 	        }
-	        i++
 	    }
 
-	    if (hasMoves) {
-	        shuffle.moves = moves
+	    var lastFreeIndex = freeIndex >= bFree.length ?
+	        bChildren.length :
+	        bFree[freeIndex]
+
+	    // Iterate through b and append any new keys
+	    // O(M) time
+	    for (var j = 0; j < bChildren.length; j++) {
+	        var newItem = bChildren[j]
+
+	        if (newItem.key) {
+	            if (!aKeys.hasOwnProperty(newItem.key)) {
+	                // Add any new keyed items
+	                // We are adding new items to the end and then sorting them
+	                // in place. In future we should insert new items in place.
+	                newChildren.push(newItem)
+	            }
+	        } else if (j >= lastFreeIndex) {
+	            // Add any leftover non-keyed items
+	            newChildren.push(newItem)
+	        }
 	    }
 
-	    return shuffle
+	    var simulate = newChildren.slice()
+	    var simulateIndex = 0
+	    var removes = []
+	    var inserts = []
+	    var simulateItem
+
+	    for (var k = 0; k < bChildren.length;) {
+	        var wantedItem = bChildren[k]
+	        simulateItem = simulate[simulateIndex]
+
+	        // remove items
+	        while (simulateItem === null && simulate.length) {
+	            removes.push(remove(simulate, simulateIndex, null))
+	            simulateItem = simulate[simulateIndex]
+	        }
+
+	        if (!simulateItem || simulateItem.key !== wantedItem.key) {
+	            // if we need a key in this position...
+	            if (wantedItem.key) {
+	                if (simulateItem && simulateItem.key) {
+	                    // if an insert doesn't put this key in place, it needs to move
+	                    if (bKeys[simulateItem.key] !== k + 1) {
+	                        removes.push(remove(simulate, simulateIndex, simulateItem.key))
+	                        simulateItem = simulate[simulateIndex]
+	                        // if the remove didn't put the wanted item in place, we need to insert it
+	                        if (!simulateItem || simulateItem.key !== wantedItem.key) {
+	                            inserts.push({key: wantedItem.key, to: k})
+	                        }
+	                        // items are matching, so skip ahead
+	                        else {
+	                            simulateIndex++
+	                        }
+	                    }
+	                    else {
+	                        inserts.push({key: wantedItem.key, to: k})
+	                    }
+	                }
+	                else {
+	                    inserts.push({key: wantedItem.key, to: k})
+	                }
+	                k++
+	            }
+	            // a key in simulate has no matching wanted key, remove it
+	            else if (simulateItem && simulateItem.key) {
+	                removes.push(remove(simulate, simulateIndex, simulateItem.key))
+	            }
+	        }
+	        else {
+	            simulateIndex++
+	            k++
+	        }
+	    }
+
+	    // remove all the remaining nodes from simulate
+	    while(simulateIndex < simulate.length) {
+	        simulateItem = simulate[simulateIndex]
+	        removes.push(remove(simulate, simulateIndex, simulateItem && simulateItem.key))
+	    }
+
+	    // If the only moves we have are deletes then we can just
+	    // let the delete patch remove these items.
+	    if (removes.length === deletedItems && !inserts.length) {
+	        return {
+	            children: newChildren,
+	            moves: null
+	        }
+	    }
+
+	    return {
+	        children: newChildren,
+	        moves: {
+	            removes: removes,
+	            inserts: inserts
+	        }
+	    }
+	}
+
+	function remove(arr, index, key) {
+	    arr.splice(index, 1)
+
+	    return {
+	        from: index,
+	        key: key
+	    }
 	}
 
 	function keyIndex(children) {
-	    var i, keys
+	    var keys = {}
+	    var free = []
+	    var length = children.length
 
-	    for (i = 0; i < children.length; i++) {
+	    for (var i = 0; i < length; i++) {
 	        var child = children[i]
 
-	        if (child.key !== undefined) {
-	            keys = keys || {}
+	        if (child.key) {
 	            keys[child.key] = i
+	        } else {
+	            free.push(i)
 	        }
 	    }
 
-	    return keys
+	    return {
+	        keys: keys,     // A hash of key name to index
+	        free: free,     // An array of unkeyed item indices
+	    }
 	}
 
 	function appendPatch(apply, patch) {
@@ -5851,6 +5908,41 @@ PS.Control_Monad_Eff = (function () {
     };
 })();
 var PS = PS || {};
+PS.Control_Monad_Eff_Ref = (function () {
+    "use strict";
+    var Prelude = PS.Prelude;
+    var Control_Monad_Eff = PS.Control_Monad_Eff;
+    
+  function newRef(val) {
+    return function () {
+      return { value: val };
+    };
+  }
+;
+    
+  function readRef(ref) {
+    return function() {
+      return ref.value;
+    };
+  }
+;
+    
+  function writeRef(ref) {
+    return function(val) {
+      return function() {
+        ref.value = val;
+        return {};
+      };
+    };
+  }
+;
+    return {
+        writeRef: writeRef, 
+        readRef: readRef, 
+        newRef: newRef
+    };
+})();
+var PS = PS || {};
 PS.Data_Maybe = (function () {
     "use strict";
     var Prelude = PS.Prelude;
@@ -5875,64 +5967,23 @@ PS.Data_Maybe = (function () {
         };
         return Just;
     })();
-    var maybe = function (_82) {
-        return function (_83) {
-            return function (_84) {
-                if (_84 instanceof Nothing) {
-                    return _82;
+    var maybe = function (_116) {
+        return function (_117) {
+            return function (_118) {
+                if (_118 instanceof Nothing) {
+                    return _116;
                 };
-                if (_84 instanceof Just) {
-                    return _83(_84.value0);
+                if (_118 instanceof Just) {
+                    return _117(_118.value0);
                 };
                 throw new Error("Failed pattern match");
             };
         };
     };
-    var functorMaybe = new Prelude.Functor(function (_85) {
-        return function (_86) {
-            if (_86 instanceof Just) {
-                return new Just(_85(_86.value0));
-            };
-            return Nothing.value;
-        };
-    });
-    var fromMaybe = function (a) {
-        return maybe(a)(Prelude.id(Prelude.categoryArr));
-    };
-    var applyMaybe = new Prelude.Apply(function (_87) {
-        return function (_88) {
-            if (_87 instanceof Just) {
-                return Prelude["<$>"](functorMaybe)(_87.value0)(_88);
-            };
-            if (_87 instanceof Nothing) {
-                return Nothing.value;
-            };
-            throw new Error("Failed pattern match");
-        };
-    }, function () {
-        return functorMaybe;
-    });
-    var bindMaybe = new Prelude.Bind(function (_91) {
-        return function (_92) {
-            if (_91 instanceof Just) {
-                return _92(_91.value0);
-            };
-            if (_91 instanceof Nothing) {
-                return Nothing.value;
-            };
-            throw new Error("Failed pattern match");
-        };
-    }, function () {
-        return applyMaybe;
-    });
     return {
         Nothing: Nothing, 
         Just: Just, 
-        fromMaybe: fromMaybe, 
-        maybe: maybe, 
-        functorMaybe: functorMaybe, 
-        applyMaybe: applyMaybe, 
-        bindMaybe: bindMaybe
+        maybe: maybe
     };
 })();
 var PS = PS || {};
@@ -5954,26 +6005,26 @@ PS.Data_Array = (function () {
             var isInt = function (n_1) {
                 return n_1 !== ~~n_1;
             };
-            var _180 = n < 0 || (n >= length(xs) || isInt(n));
-            if (_180) {
+            var _531 = n < 0 || (n >= length(xs) || isInt(n));
+            if (_531) {
                 return Data_Maybe.Nothing.value;
             };
-            if (!_180) {
+            if (!_531) {
                 return new Data_Maybe.Just(xs[n]);
             };
             throw new Error("Failed pattern match");
         };
     };
-    var $$null = function (_106) {
-        if (_106.length === 0) {
+    var $$null = function (_140) {
+        if (_140.length === 0) {
             return true;
         };
         return false;
     };
     var functorArray = new Prelude.Functor(map);
-    var elemIndex = function (__dict_Eq_63) {
+    var elemIndex = function (__dict_Eq_83) {
         return function (x) {
-            return findIndex(Prelude["=="](__dict_Eq_63)(x));
+            return findIndex(Prelude["=="](__dict_Eq_83)(x));
         };
     };
     return {
@@ -6162,21 +6213,54 @@ PS.Data_Html_Elements_Html5 = (function () {
     };
 })();
 var PS = PS || {};
-PS.Data_Array_Unsafe = (function () {
+PS.Control_Monad_Eff_Class = (function () {
     "use strict";
-    var Prelude_Unsafe = PS.Prelude_Unsafe;
     var Prelude = PS.Prelude;
-    var Data_Array = PS.Data_Array;
-    var Data_Maybe_Unsafe = PS.Data_Maybe_Unsafe;
-    var head = function (_124) {
-        if (_124.length >= 1) {
-            var _184 = _124.slice(1);
-            return _124[0];
-        };
-        throw new Error("Failed pattern match");
+    var Control_Monad_Trans = PS.Control_Monad_Trans;
+    var Data_Monoid = PS.Data_Monoid;
+    var Control_Monad_Eff = PS.Control_Monad_Eff;
+    var Control_Monad_Maybe_Trans = PS.Control_Monad_Maybe_Trans;
+    var Control_Monad_Error_Trans = PS.Control_Monad_Error_Trans;
+    var Control_Monad_State_Trans = PS.Control_Monad_State_Trans;
+    var Control_Monad_Writer_Trans = PS.Control_Monad_Writer_Trans;
+    var Control_Monad_Reader_Trans = PS.Control_Monad_Reader_Trans;
+    var Control_Monad_RWS_Trans = PS.Control_Monad_RWS_Trans;
+    
+    /**
+     *  | The `MonadEff` class captures those monads which support native effects.
+     *  |
+     *  | Instances are provided for `Eff` itself, and the standard monad transformers.
+     *  |
+     *  | `liftEff` can be used in any appropriate monad transformer stack to lift an action
+     *  | of type `Eff eff a` into the monad.
+     *  |
+     *  | Note that `MonadEff` is parameterized by the row of effects, so type inference can be
+     *  | tricky. It is generally recommended to either work with a polymorphic row of effects,
+     *  | or a concrete, closed row of effects such as `(trace :: Trace)`.
+     */
+    var MonadEff = function (__superclass_Prelude$dotMonad_0, liftEff) {
+        this["__superclass_Prelude.Monad_0"] = __superclass_Prelude$dotMonad_0;
+        this.liftEff = liftEff;
+    };
+    
+    /**
+     *  | The `MonadEff` class captures those monads which support native effects.
+     *  |
+     *  | Instances are provided for `Eff` itself, and the standard monad transformers.
+     *  |
+     *  | `liftEff` can be used in any appropriate monad transformer stack to lift an action
+     *  | of type `Eff eff a` into the monad.
+     *  |
+     *  | Note that `MonadEff` is parameterized by the row of effects, so type inference can be
+     *  | tricky. It is generally recommended to either work with a polymorphic row of effects,
+     *  | or a concrete, closed row of effects such as `(trace :: Trace)`.
+     */
+    var liftEff = function (dict) {
+        return dict.liftEff;
     };
     return {
-        head: head
+        MonadEff: MonadEff, 
+        liftEff: liftEff
     };
 })();
 var PS = PS || {};
@@ -6372,6 +6456,8 @@ PS.Network_Routing_Client = (function () {
     var Data_Function = PS.Data_Function;
     var Data_String = PS.Data_String;
     var Control_Monad_Eff = PS.Control_Monad_Eff;
+    var Control_Monad_Eff_Class = PS.Control_Monad_Eff_Class;
+    var Control_Monad_Eff_Unsafe = PS.Control_Monad_Eff_Unsafe;
     var Data_Array = PS.Data_Array;
     var Data_Maybe = PS.Data_Maybe;
     
@@ -6395,6 +6481,13 @@ function configureImpl(r, opts){
   }
 };
     
+function setRouteImpl(d, p){
+  return function SetRouteEff(){
+    d.setRoute(p);
+    return {};
+  }
+};
+    
 function unsafeCoerce(a){
   return a;
 };
@@ -6413,16 +6506,21 @@ function routeImpl(d,p,f){
   }
 };
     
-function setRouteImpl(d, p){
-  return function SetRouteEff(){
-    d.setRoute(p);
-    return {};
+function wrap2(f){
+  return function Wrap2(a,b){
+    var _this = this;
+    var setRoute = function(route){
+      return function(){
+        _this.setRoute(route);
+      }
+    };
+    return f(setRoute)(a)(b)();
   }
 };
     
-function wrap2(f){
-  return function Wrap2(a,b){return f(a,b)();}
-};
+    /**
+     *  | Path data type
+     */
     var Exact = (function () {
         function Exact(value0) {
             this.value0 = value0;
@@ -6432,6 +6530,10 @@ function wrap2(f){
         };
         return Exact;
     })();
+    
+    /**
+     *  | Path data type
+     */
     var Regex = (function () {
         function Regex(value0) {
             this.value0 = value0;
@@ -6441,6 +6543,10 @@ function wrap2(f){
         };
         return Regex;
     })();
+    
+    /**
+     *  | Path data type
+     */
     var Param = (function () {
         function Param(value0) {
             this.value0 = value0;
@@ -6450,6 +6556,10 @@ function wrap2(f){
         };
         return Param;
     })();
+    
+    /**
+     *  | Path data type
+     */
     var Any = (function () {
         function Any() {
 
@@ -6460,68 +6570,110 @@ function wrap2(f){
     var Pathes = function (x) {
         return x;
     };
+    
+    /**
+     *  | Callback Monad
+     */
+    var Callback = function (x) {
+        return x;
+    };
+    
+    /**
+     *  | Routing Monad
+     */
     var RoutingM = function (x) {
         return x;
     };
-    var $minus$div = function (_143) {
-        return function (_144) {
-            return Prelude[":"](unsafeCoerce(_143))(_144);
+    
+    /**
+     *  | add path piece without parameter to pathes
+     */
+    var $minus$div = function (_498) {
+        return function (_499) {
+            return Prelude[":"](unsafeCoerce(_498))(_499);
         };
     };
-    var $plus$div = function (_145) {
-        return function (_146) {
-            return Prelude[":"](unsafeCoerce(_145))(unsafeCoerce(_146));
+    
+    /**
+     *  | add path piece with parameter to pathes
+     */
+    var $plus$div = function (_500) {
+        return function (_501) {
+            return Prelude[":"](unsafeCoerce(_500))(unsafeCoerce(_501));
         };
     };
-    var runRouter = function (_140) {
+    
+    /**
+     *  | set route in Callback monad.
+     *  | convenient to redirect.
+     */
+    var setRoute = function (route_1) {
+        return Callback(function (set) {
+            return set(route_1);
+        });
+    };
+    var runCallback = function (_495) {
+        return _495;
+    };
+    
+    /**
+     *  | run Router Monad without initialize
+     */
+    var runRouter$prime = function (_494) {
         return function __do() {
-            var _10 = newRouter(Network_Routing_Client_Foreign.director)();
-            var _9 = _140({
+            var _31 = newRouter(Network_Routing_Client_Foreign.director)();
+            var _30 = _494({
                 variableIndex: 0, 
-                routerInstance: _10, 
+                routerInstance: _31, 
                 historyAPI: false, 
                 notFound: Data_Maybe.Nothing.value
             })();
             (function () {
-                if (_9.s.notFound instanceof Data_Maybe.Nothing) {
-                    return configureImpl(_10, {
-                        historyAPI: _9.s.historyAPI
+                if (_30.s.notFound instanceof Data_Maybe.Nothing) {
+                    return configureImpl(_31, {
+                        historyAPI: _30.s.historyAPI
                     });
                 };
-                if (_9.s.notFound instanceof Data_Maybe.Just) {
-                    return configureImpl(_10, {
-                        historyAPI: _9.s.historyAPI, 
-                        notFound: _9.s.notFound.value0(function (s_1) {
-                            return setRouteImpl(_10, s_1);
+                if (_30.s.notFound instanceof Data_Maybe.Just) {
+                    return configureImpl(_31, {
+                        historyAPI: _30.s.historyAPI, 
+                        notFound: runCallback(_30.s.notFound.value0)(function (s_1) {
+                            return setRouteImpl(_31, s_1);
                         })
                     });
                 };
                 throw new Error("Failed pattern match");
             })()();
-            initRouter(_10)();
-            return function (s_1) {
-                return setRouteImpl(_10, s_1);
+            return {
+                setRoute: function (s_1) {
+                    return setRouteImpl(_31, s_1);
+                }, 
+                init: initRouter(_31)
             };
         };
     };
+    
+    /**
+     *  | get regexed parameter from path piece
+     */
     var regex = Regex.create;
-    var pathToString = function (_141) {
-        if (_141 instanceof Exact) {
-            return _141.value0;
+    var pathToString = function (_496) {
+        if (_496 instanceof Exact) {
+            return _496.value0;
         };
-        if (_141 instanceof Regex) {
-            return "(" + (_141.value0 + ")");
+        if (_496 instanceof Regex) {
+            return "(" + (_496.value0 + ")");
         };
-        if (_141 instanceof Param) {
-            return _141.value0;
+        if (_496 instanceof Param) {
+            return _496.value0;
         };
-        if (_141 instanceof Any) {
+        if (_496 instanceof Any) {
             return ":_";
         };
         throw new Error("Failed pattern match");
     };
-    var pathesToString = function (_142) {
-        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_142));
+    var pathesToString = function (_497) {
+        return "/" + Data_String.joinWith("/")(Prelude["<$>"](Data_Array.functorArray)(pathToString)(_497));
     };
     var modifyState = function (f) {
         return RoutingM(function (s) {
@@ -6531,29 +6683,31 @@ function wrap2(f){
             });
         });
     };
+    
+    /**
+     *  | set handler for route not match
+     */
     var notFound = function (m) {
         return modifyState(function (s) {
-            var _199 = {};
-            for (var _200 in s) {
-                if (s.hasOwnProperty(_200)) {
-                    _199[_200] = s[_200];
+            var _548 = {};
+            for (var _549 in s) {
+                if (s.hasOwnProperty(_549)) {
+                    _548[_549] = s[_549];
                 };
             };
-            _199.notFound = Data_Maybe.Just.create(function (s_1) {
-                return Prelude["void"](Control_Monad_Eff.functorEff)(m(s_1));
-            });
-            return _199;
+            _548.notFound = new Data_Maybe.Just(m);
+            return _548;
         });
     };
     var succIndex = modifyState(function (s) {
-        var _201 = {};
-        for (var _202 in s) {
-            if (s.hasOwnProperty(_202)) {
-                _201[_202] = s[_202];
+        var _550 = {};
+        for (var _551 in s) {
+            if (s.hasOwnProperty(_551)) {
+                _550[_551] = s[_551];
             };
         };
-        _201.variableIndex = s.variableIndex + 1;
-        return _201;
+        _550.variableIndex = s.variableIndex + 1;
+        return _550;
     });
     var liftRoutingM = function (m) {
         return RoutingM(function (s) {
@@ -6566,36 +6720,58 @@ function wrap2(f){
             };
         });
     };
+    
+    /**
+     *  routing Monad methods
+     */
     var getState = RoutingM(function (s) {
         return Prelude["return"](Control_Monad_Eff.monadEff)({
             a: s, 
             s: s
         });
     });
-    var functorRoutingM = new Prelude.Functor(function (_147) {
-        return function (_148) {
+    var functorRoutingM = new Prelude.Functor(function (_502) {
+        return function (_503) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var n = _148(s)();
+                    var n = _503(s)();
                     return {
-                        a: _147(n.a), 
+                        a: _502(n.a), 
                         s: n.s
                     };
                 };
             });
         };
     });
+    var functorCallback = new Prelude.Functor(function (_508) {
+        return function (_509) {
+            return Callback(function (s) {
+                return function __do() {
+                    var n = _509(s)();
+                    return _508(n);
+                };
+            });
+        };
+    });
+    
+    /**
+     *  | add exact match for path piece
+     */
     var exact = Exact.create;
+    
+    /**
+     *  | empty path
+     */
     var empty = [  ];
-    var applyRoutingM = new Prelude.Apply(function (_149) {
-        return function (_150) {
+    var applyRoutingM = new Prelude.Apply(function (_504) {
+        return function (_505) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _6 = _149(s)();
-                    var _5 = _150(_6.s)();
+                    var _26 = _504(s)();
+                    var _25 = _505(_26.s)();
                     return {
-                        a: _6.a(_5.a), 
-                        s: _5.s
+                        a: _26.a(_25.a), 
+                        s: _25.s
                     };
                 };
             });
@@ -6603,13 +6779,13 @@ function wrap2(f){
     }, function () {
         return functorRoutingM;
     });
-    var bindRoutingM = new Prelude.Bind(function (_151) {
-        return function (_152) {
+    var bindRoutingM = new Prelude.Bind(function (_506) {
+        return function (_507) {
             return RoutingM(function (s) {
                 return function __do() {
-                    var _8 = _151(s)();
-                    var _7 = _152(_8.a);
-                    return _7(_8.s)();
+                    var _28 = _506(s)();
+                    var _27 = _507(_28.a);
+                    return _27(_28.s)();
                 };
             });
         };
@@ -6618,23 +6794,63 @@ function wrap2(f){
     });
     var route = function (p) {
         return function (f) {
-            return Prelude[">>="](bindRoutingM)(getState)(function (_12) {
-                return liftRoutingM(routeImpl(_12.routerInstance, pathesToString(p), f));
+            return Prelude[">>="](bindRoutingM)(getState)(function (_37) {
+                return liftRoutingM(routeImpl(_37.routerInstance, pathesToString(p), f));
             });
         };
     };
+    
+    /**
+     *  | add routes which have 2 parameters
+     */
     var routes2 = function (p) {
         return function (f) {
-            return route(p)(Prelude["<$>"](Data_Array.functorArray)(function (a) {
-                return wrap2(Data_Function.mkFn2(a));
+            return route(p)(Prelude["<$>"](Data_Array.functorArray)(function (r) {
+                return wrap2(function (set) {
+                    return function (p1) {
+                        return function (p2) {
+                            return runCallback(r(p1)(p2))(set);
+                        };
+                    };
+                });
             })(f));
         };
     };
+    
+    /**
+     *  | add route which have 2 parameters
+     */
     var route2 = function (p) {
         return function (f) {
             return routes2(p)([ f ]);
         };
     };
+    var applyCallback = new Prelude.Apply(function (_510) {
+        return function (_511) {
+            return Callback(function (s) {
+                return function __do() {
+                    var _33 = _510(s)();
+                    var _32 = _511(s)();
+                    return _33(_32);
+                };
+            });
+        };
+    }, function () {
+        return functorCallback;
+    });
+    var bindCallback = new Prelude.Bind(function (_512) {
+        return function (_513) {
+            return Callback(function (s) {
+                return function __do() {
+                    var _35 = _512(s)();
+                    var _34 = _513(_35);
+                    return _34(s)();
+                };
+            });
+        };
+    }, function () {
+        return applyCallback;
+    });
     var applicativeRoutingM = new Prelude.Applicative(function () {
         return applyRoutingM;
     }, function (a) {
@@ -6650,16 +6866,39 @@ function wrap2(f){
     }, function () {
         return bindRoutingM;
     });
+    
+    /**
+     *  | create parameter in pathes
+     */
     var param = function (v) {
-        return Prelude[">>="](bindRoutingM)(getState)(function (_11) {
-            var n = ":v" + Prelude.show(Prelude.showNumber)(_11.variableIndex);
-            return Prelude[">>="](bindRoutingM)(liftRoutingM(paramImpl(_11.routerInstance, n, pathToString(v))))(function () {
+        return Prelude[">>="](bindRoutingM)(getState)(function (_36) {
+            var n = ":v" + Prelude.show(Prelude.showNumber)(_36.variableIndex);
+            return Prelude[">>="](bindRoutingM)(liftRoutingM(paramImpl(_36.routerInstance, n, pathToString(v))))(function () {
                 return Prelude[">>="](bindRoutingM)(succIndex)(function () {
                     return Prelude["return"](monadRoutingM)(new Param(n));
                 });
             });
         });
     };
+    var applicativeCallback = new Prelude.Applicative(function () {
+        return applyCallback;
+    }, function (a) {
+        return Callback(function (_492) {
+            return Prelude["return"](Control_Monad_Eff.monadEff)(a);
+        });
+    });
+    var monadCallback = new Prelude.Monad(function () {
+        return applicativeCallback;
+    }, function () {
+        return bindCallback;
+    });
+    var monadEffCallback = new Control_Monad_Eff_Class.MonadEff(function () {
+        return monadCallback;
+    }, function (m) {
+        return Callback(function (_493) {
+            return m;
+        });
+    });
     return {
         route2: route2, 
         routes2: routes2, 
@@ -6670,12 +6909,61 @@ function wrap2(f){
         exact: exact, 
         empty: empty, 
         notFound: notFound, 
-        runRouter: runRouter, 
+        setRoute: setRoute, 
+        "runRouter'": runRouter$prime, 
         functorRoutingM: functorRoutingM, 
         applyRoutingM: applyRoutingM, 
         applicativeRoutingM: applicativeRoutingM, 
         bindRoutingM: bindRoutingM, 
-        monadRoutingM: monadRoutingM
+        monadRoutingM: monadRoutingM, 
+        functorCallback: functorCallback, 
+        applyCallback: applyCallback, 
+        applicativeCallback: applicativeCallback, 
+        bindCallback: bindCallback, 
+        monadCallback: monadCallback, 
+        monadEffCallback: monadEffCallback
+    };
+})();
+var PS = PS || {};
+PS.Sliding_Cached = (function () {
+    "use strict";
+    var Prelude = PS.Prelude;
+    var Control_Monad_Eff_Ref = PS.Control_Monad_Eff_Ref;
+    var Control_Monad_Eff = PS.Control_Monad_Eff;
+    var Data_Maybe = PS.Data_Maybe;
+    
+function unsafePerformEff(m){
+  return m();
+};
+    var Cached = function (x) {
+        return x;
+    };
+    var newCached = function (a) {
+        return unsafePerformEff(function __do() {
+            var _38 = Control_Monad_Eff_Ref.newRef(new Data_Maybe.Just(a))();
+            return {
+                value: _38, 
+                action: Prelude["return"](Control_Monad_Eff.monadEff)(a)
+            };
+        });
+    };
+    var getCached = function (_514) {
+        return function __do() {
+            var v = Control_Monad_Eff_Ref.readRef(_514.value)();
+            if (v instanceof Data_Maybe.Just) {
+                return v.value0;
+            };
+            if (v instanceof Data_Maybe.Nothing) {
+                var _40 = _514.action();
+                Control_Monad_Eff_Ref.writeRef(_514.value)(new Data_Maybe.Just(_40))();
+                return _40;
+            };
+            throw new Error("Failed pattern match");
+        };
+    };
+    return {
+        getCached: getCached, 
+        newCached: newCached
     };
 })();
 var PS = PS || {};
@@ -6685,14 +6973,16 @@ PS.Sliding_Engine = (function () {
     var Data_Html_Elements_Html5 = PS.Data_Html_Elements_Html5;
     var Data_Html_Attributes_Html5 = PS.Data_Html_Attributes_Html5;
     var Prelude = PS.Prelude;
-    var Data_Array = PS.Data_Array;
     var $$Math = PS.$$Math;
     var Data_Maybe = PS.Data_Maybe;
-    var Data_Array_Unsafe = PS.Data_Array_Unsafe;
-    var Data_Html = PS.Data_Html;
+    var Data_Array = PS.Data_Array;
     var FRP_Kefir = PS.FRP_Kefir;
     var Network_Routing_Client = PS.Network_Routing_Client;
+    var Control_Monad_Eff_Class = PS.Control_Monad_Eff_Class;
     var Global = PS.Global;
+    var Data_Html = PS.Data_Html;
+    var Sliding_Cached = PS.Sliding_Cached;
+    var Data_Array_Unsafe = PS.Data_Array_Unsafe;
     var Control_Monad_Eff = PS.Control_Monad_Eff;
     var DOM = PS.DOM;
     var Data_Html_Events_Normal = PS.Data_Html_Events_Normal;
@@ -6733,13 +7023,6 @@ function toggleFullScreen() {
     } else if (document.webkitCancelFullScreen) {
       document.webkitCancelFullScreen();
     }
-  }
-};
-    
-function setHash(s){
-  return function(){
-    window.location.hash = s;
-    return {};
   }
 };
     
@@ -6834,7 +7117,7 @@ function swipeEventImpl(action, duration, node){
     };
     var setPage = function (p) {
         return function (s) {
-            return ModifyPage.create(function (_154) {
+            return ModifyPage.create(function (_516) {
                 return {
                     page: p, 
                     step: s
@@ -6842,14 +7125,14 @@ function swipeEventImpl(action, duration, node){
             });
         };
     };
-    var restrict = function (__dict_Ord_75) {
+    var restrict = function (__dict_Ord_432) {
         return function (mn) {
             return function (mx) {
                 return function (a) {
-                    if (Prelude["<"](__dict_Ord_75)(a)(mn)) {
+                    if (Prelude["<"](__dict_Ord_432)(a)(mn)) {
                         return mn;
                     };
-                    if (Prelude["<"](__dict_Ord_75)(mx)(a)) {
+                    if (Prelude["<"](__dict_Ord_432)(mx)(a)) {
                         return mx;
                     };
                     if (Prelude.otherwise) {
@@ -6861,26 +7144,26 @@ function swipeEventImpl(action, duration, node){
         };
     };
     var render = function (config) {
-        return function (slides) {
-            return function (state) {
-                var scale = $$Math.min(state.windowSize.height / config.size.height)(state.windowSize.width / config.size.width);
-                var transform = "translate(-50%, -50%) scale(" + (Prelude.show(Prelude.showNumber)(scale) + ")");
-                return Data_Html_Elements_Html5.div([ Data_Html_Attributes_Html5.style({
-                    position: "absolute", 
-                    left: "50%", 
-                    top: "50%", 
-                    width: Prelude.show(Prelude.showNumber)(config.size.width) + "px", 
-                    height: Prelude.show(Prelude.showNumber)(config.size.height) + "px", 
-                    transform: transform, 
-                    "-moz-transform": transform, 
-                    "-webkit-transform": transform, 
-                    "-o-transform": transform, 
-                    "-ms-transform": transform
-                }), Data_Html_Attributes_Html5.class_("slide-wrapper") ])(Prelude[":"](Data_Maybe.fromMaybe(Data_Array_Unsafe.head(Data_Array_Unsafe.head(slides)))(Prelude[">>="](Data_Maybe.bindMaybe)(Data_Array["!!"](slides)(state.current.page))(function (s) {
-                    return Data_Array["!!"](s)(state.current.step);
-                })))(Data_Maybe.maybe([  ])(function (p) {
-                    return [ p(config.size)(slides)(state) ];
-                })(config.pager)));
+        return function (maxPage) {
+            return function (slide_1) {
+                return function (state) {
+                    var scale = $$Math.min(state.windowSize.height / config.size.height)(state.windowSize.width / config.size.width);
+                    var transform = "translate(-50%, -50%) scale(" + (Prelude.show(Prelude.showNumber)(scale) + ")");
+                    return Data_Html_Elements_Html5.div([ Data_Html_Attributes_Html5.style({
+                        position: "absolute", 
+                        left: "50%", 
+                        top: "50%", 
+                        width: Prelude.show(Prelude.showNumber)(config.size.width) + "px", 
+                        height: Prelude.show(Prelude.showNumber)(config.size.height) + "px", 
+                        transform: transform, 
+                        "-moz-transform": transform, 
+                        "-webkit-transform": transform, 
+                        "-o-transform": transform, 
+                        "-ms-transform": transform
+                    }), Data_Html_Attributes_Html5.class_("slide-wrapper") ])(Prelude[":"](slide_1)(Data_Maybe.maybe([  ])(function (p) {
+                        return [ p(config.size)(maxPage)(state) ];
+                    })(config.pager)));
+                };
             };
         };
     };
@@ -6917,38 +7200,40 @@ function swipeEventImpl(action, duration, node){
     };
     var update = function (html) {
         return function (slides) {
-            return function (state) {
-                return function (action) {
-                    if (action instanceof NoOp) {
-                        return Prelude["return"](Control_Monad_Eff.monadEff)(state);
-                    };
-                    if (action instanceof ReSize) {
-                        return Prelude["return"](Control_Monad_Eff.monadEff)((function () {
-                            var _219 = {};
-                            for (var _220 in state) {
-                                if (state.hasOwnProperty(_220)) {
-                                    _219[_220] = state[_220];
-                                };
-                            };
-                            _219.windowSize = action.value0;
-                            return _219;
-                        })());
-                    };
-                    if (action instanceof ModifyPage) {
-                        var c$prime = rePage(slides)(action.value0(state.current));
-                        return function __do() {
-                            setHash("#/page/" + (Prelude.show(Prelude.showNumber)(c$prime.page + 1) + ("/" + Prelude.show(Prelude.showNumber)(c$prime.step + 1))))();
-                            var _222 = {};
-                            for (var _223 in state) {
-                                if (state.hasOwnProperty(_223)) {
-                                    _222[_223] = state[_223];
-                                };
-                            };
-                            _222.current = c$prime;
-                            return _222;
+            return function (setRoute) {
+                return function (state) {
+                    return function (action) {
+                        if (action instanceof NoOp) {
+                            return Prelude["return"](Control_Monad_Eff.monadEff)(state);
                         };
+                        if (action instanceof ReSize) {
+                            return Prelude["return"](Control_Monad_Eff.monadEff)((function () {
+                                var _585 = {};
+                                for (var _586 in state) {
+                                    if (state.hasOwnProperty(_586)) {
+                                        _585[_586] = state[_586];
+                                    };
+                                };
+                                _585.windowSize = action.value0;
+                                return _585;
+                            })());
+                        };
+                        if (action instanceof ModifyPage) {
+                            var c$prime = rePage(slides)(action.value0(state.current));
+                            return function __do() {
+                                setRoute("/page/" + (Prelude.show(Prelude.showNumber)(c$prime.page + 1) + ("/" + Prelude.show(Prelude.showNumber)(c$prime.step + 1))))();
+                                var _588 = {};
+                                for (var _589 in state) {
+                                    if (state.hasOwnProperty(_589)) {
+                                        _588[_589] = state[_589];
+                                    };
+                                };
+                                _588.current = c$prime;
+                                return _588;
+                            };
+                        };
+                        throw new Error("Failed pattern match");
                     };
-                    throw new Error("Failed pattern match");
                 };
             };
         };
@@ -6964,14 +7249,14 @@ function swipeEventImpl(action, duration, node){
             return orImpl(a, b);
         };
     };
-    var numIndicator = function (_155) {
-        return function (_156) {
-            return function (_157) {
+    var numIndicator = function (_517) {
+        return function (_518) {
+            return function (_519) {
                 return Data_Html_Elements_Html5.div([ Data_Html_Attributes_Html5.class_("page-number"), Data_Html_Attributes_Html5.style({
                     position: "absolute", 
                     bottom: "10px", 
                     right: "10px"
-                }) ])([ Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("current") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(_157.current.page + 1)) ]), Data_Html_Elements_Html5.span([  ])([ Data_Html_Elements_Html5.text("/") ]), Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("all") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(Data_Array.length(_156))) ]) ]);
+                }) ])([ Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("current") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(_519.current.page + 1)) ]), Data_Html_Elements_Html5.span([  ])([ Data_Html_Elements_Html5.text("/") ]), Data_Html_Elements_Html5.span([ Data_Html_Attributes_Html5.class_("all") ])([ Data_Html_Elements_Html5.text(Prelude.show(Prelude.showNumber)(_518.page)) ]) ]);
             };
         };
     };
@@ -6987,19 +7272,19 @@ function swipeEventImpl(action, duration, node){
         };
     };
     var getSize = function (e) {
-        var _228 = equal(e)(body);
-        if (_228) {
+        var _594 = equal(e)(body);
+        if (_594) {
             return getWindowSize;
         };
-        if (!_228) {
+        if (!_594) {
             return getElementSize(e);
         };
         throw new Error("Failed pattern match");
     };
-    var elem = function (__dict_Eq_76) {
+    var elem = function (__dict_Eq_433) {
         return function (a) {
             return function (l) {
-                return Data_Array.elemIndex(__dict_Eq_76)(a)(l) >= 0;
+                return Data_Array.elemIndex(__dict_Eq_433)(a)(l) >= 0;
             };
         };
     };
@@ -7030,34 +7315,43 @@ function swipeEventImpl(action, duration, node){
                     return !Data_Array["null"](s);
                 })(slides0);
                 return function __do() {
-                    var _23 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
-                    var _22 = Data_Html.getNode(_23)();
-                    appendChild(parent)(_22)();
-                    var _21 = FRP_Kefir.emitter();
-                    var _20 = getSize(parent)();
-                    var _19 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_153) {
+                    var _53 = FRP_Kefir.emitter();
+                    var _52 = Network_Routing_Client["runRouter'"](Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.param(Network_Routing_Client.regex("[1-9][0-9]*")))(function (_41) {
+                        return Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.route2(Network_Routing_Client["-/"](Network_Routing_Client.exact("page"))(Network_Routing_Client["+/"](_41)(Network_Routing_Client["+/"](_41)(Network_Routing_Client.empty))))(function (p) {
+                            return function (s) {
+                                return Control_Monad_Eff_Class.liftEff(Network_Routing_Client.monadEffCallback)(FRP_Kefir.emit(_53)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1)));
+                            };
+                        }))(function () {
+                            return Network_Routing_Client.notFound(Network_Routing_Client.setRoute("/page/1/1"));
+                        });
+                    }))();
+                    var _51 = Data_Html.createElement(Data_Html_Elements_Html5.div([  ])([  ]))();
+                    var _50 = Data_Html.getNode(_51)();
+                    appendChild(parent)(_50)();
+                    var _49 = getSize(parent)();
+                    var _48 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.fromEventE(browerWindow)("resize")(function (_515) {
                         return getSize(parent);
-                    }))(FRP_Kefir.toPropertyWith(_20))();
-                    var _18 = FRP_Kefir.map(ReSize.create)(_19)();
+                    }))(FRP_Kefir.toPropertyWith(_49))();
+                    var _47 = FRP_Kefir.map(ReSize.create)(_48)();
                     swipeEventImpl({
-                        left: FRP_Kefir.emit(_21)(prevStep), 
-                        right: FRP_Kefir.emit(_21)(nextStep)
-                    }, config.swipeDuration, _22)();
-                    var _17 = FRP_Kefir.fromEvent(_22)("click")(Prelude.id(Prelude.categoryArr))();
-                    var _16 = FRP_Kefir.sampledBy(_19)(_17)(function (ws) {
+                        left: FRP_Kefir.emit(_53)(prevStep), 
+                        right: FRP_Kefir.emit(_53)(nextStep)
+                    }, config.swipeDuration, _50)();
+                    var _46 = FRP_Kefir.fromEvent(_50)("click")(Prelude.id(Prelude.categoryArr))();
+                    var _45 = FRP_Kefir.sampledBy(_48)(_46)(function (ws) {
                         return function (cl) {
-                            var _237 = equal(cl.target)(_22);
-                            if (_237) {
-                                var _238 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
-                                if (_238) {
+                            var _605 = equal(cl.target)(_50);
+                            if (_605) {
+                                var _606 = or(cl.offsetX)(cl.layerX) > (config.size.width / 2);
+                                if (_606) {
                                     return nextStep;
                                 };
-                                if (!_238) {
+                                if (!_606) {
                                     return prevStep;
                                 };
                                 throw new Error("Failed pattern match");
                             };
-                            if (!_237) {
+                            if (!_605) {
                                 return NoOp.value;
                             };
                             throw new Error("Failed pattern match");
@@ -7068,48 +7362,58 @@ function swipeEventImpl(action, duration, node){
                         var nextKeys = [ 32, 13, 40, 39, 74 ];
                         return function __do() {
                             addEventListener(browerWindow)("keydown")(function (e) {
-                                var _240 = or(e.which)(e.keyCode);
-                                if (_240 === 70) {
+                                var _608 = or(e.which)(e.keyCode);
+                                if (_608 === 70) {
                                     return toggleFullScreen;
                                 };
-                                if (_240 === 48) {
-                                    return FRP_Kefir.emit(_21)(setPage(0)(0));
+                                if (_608 === 48) {
+                                    return FRP_Kefir.emit(_53)(setPage(0)(0));
                                 };
-                                if (elem(Prelude.eqNumber)(_240)(nextKeys)) {
-                                    return FRP_Kefir.emit(_21)(nextStep);
+                                if (elem(Prelude.eqNumber)(_608)(nextKeys)) {
+                                    return FRP_Kefir.emit(_53)(nextStep);
                                 };
-                                if (elem(Prelude.eqNumber)(_240)(prevKeys)) {
-                                    return FRP_Kefir.emit(_21)(prevStep);
+                                if (elem(Prelude.eqNumber)(_608)(prevKeys)) {
+                                    return FRP_Kefir.emit(_53)(prevStep);
                                 };
                                 if (Prelude.otherwise) {
                                     return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
                                 };
                                 throw new Error("Failed pattern match");
                             })();
-                            var _15 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _18, FRP_Kefir.forget(_21), FRP_Kefir.forget(_16) ]))(FRP_Kefir.debounce(20))();
-                            var _14 = FRP_Kefir.scanEff(update(_23)(slides))({
-                                windowSize: _20, 
+                            var _44 = Prelude[">>="](Control_Monad_Eff.bindEff)(FRP_Kefir.merge([ _47, FRP_Kefir.forget(_53), FRP_Kefir.forget(_45) ]))(FRP_Kefir.debounce(20))();
+                            var _43 = FRP_Kefir.scanEff(update(_51)(slides)(_52.setRoute))({
+                                windowSize: _49, 
                                 current: {
                                     page: 0, 
                                     step: 0
                                 }
-                            })(_15)();
-                            FRP_Kefir.onValue(_14)(function (st) {
-                                return Data_Html.patch(render(config)(slides)(st))(_23);
-                            })();
-                            Network_Routing_Client.runRouter(Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.param(Network_Routing_Client.regex("[1-9][0-9]*")))(function (_13) {
-                                return Prelude[">>="](Network_Routing_Client.bindRoutingM)(Network_Routing_Client.route2(Network_Routing_Client["-/"](Network_Routing_Client.exact("page"))(Network_Routing_Client["+/"](_13)(Network_Routing_Client["+/"](_13)(Network_Routing_Client.empty))))(function (p) {
-                                    return function (s) {
-                                        return FRP_Kefir.emit(_21)(setPage(Global.readInt(10)(p) - 1)(Global.readInt(10)(s) - 1));
+                            })(_44)();
+                            FRP_Kefir.onValue(_43)(function (st) {
+                                var _611 = Data_Array["!!"](slides)(st.current.page);
+                                if (_611 instanceof Data_Maybe.Nothing) {
+                                    return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
+                                };
+                                if (_611 instanceof Data_Maybe.Just) {
+                                    var _612 = Data_Array["!!"](_611.value0)(st.current.step);
+                                    if (_612 instanceof Data_Maybe.Nothing) {
+                                        return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
                                     };
-                                }))(function () {
-                                    return Network_Routing_Client.notFound(function (setRoute) {
-                                        return setRoute("/page/1/1");
-                                    });
-                                });
-                            }))();
+                                    if (_612 instanceof Data_Maybe.Just) {
+                                        return function __do() {
+                                            var _42 = Sliding_Cached.getCached(_612.value0)();
+                                            return Data_Html.patch(render(config)({
+                                                page: Data_Array.length(slides), 
+                                                step: Data_Array.length(_611.value0)
+                                            })(_42)(st))(_51)();
+                                        };
+                                    };
+                                    throw new Error("Failed pattern match");
+                                };
+                                throw new Error("Failed pattern match");
+                            })();
+                            _52.init();
                             return {
-                                action: _21
+                                action: _53
                             };
                         };
                     })()();
@@ -7128,12 +7432,13 @@ var PS = PS || {};
 PS.Main = (function () {
     "use strict";
     var Sliding_Engine = PS.Sliding_Engine;
+    var Prelude = PS.Prelude;
+    var Sliding_Cached = PS.Sliding_Cached;
     var Data_Html_Elements_Html5 = PS.Data_Html_Elements_Html5;
     var Data_Html_Attributes_Html5 = PS.Data_Html_Attributes_Html5;
-    var Prelude = PS.Prelude;
     var DOM = PS.DOM;
     var Data_Html = PS.Data_Html;
-    var main = Sliding_Engine.slide(Sliding_Engine.defaultSlideConfig)(Sliding_Engine.body)([ [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("purescript presentation library") ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ]), Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ]) ], [ Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("project URL") ]), Data_Html_Elements_Html5.a([ Data_Html_Attributes_Html5.href("http://github.com/philopon/sliding") ])([ Data_Html_Elements_Html5.text("github") ]) ]) ] ]);
+    var main = Sliding_Engine.slide(Sliding_Engine.defaultSlideConfig)(Sliding_Engine.body)([ [ Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Sliding") ]), Data_Html_Elements_Html5.h2([  ])([ Data_Html_Elements_Html5.text("purescript presentation library") ]) ])) ], [ Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]) ])), Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]) ])), Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]) ])), Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("Operation") ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("j,space,enter,right arrow,down arrow,click right harf,swipe left") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("next slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("k,left arrow,up arrow,click left harf,swipe right") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("prev slide") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("f") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("toggle fullscreen") ]) ]), Data_Html_Elements_Html5.dl([  ])([ Data_Html_Elements_Html5.dt([  ])([ Data_Html_Elements_Html5.text("0") ]), Data_Html_Elements_Html5.dd([  ])([ Data_Html_Elements_Html5.text("jump to first slide") ]) ]) ])) ], [ Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("todo") ]), Data_Html_Elements_Html5.ul([  ])([ Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("wrap raw functions") ]), Data_Html_Elements_Html5.li([  ])([ Data_Html_Elements_Html5.text("slide overview") ]) ]) ])) ], [ Sliding_Cached.newCached(Data_Html_Elements_Html5.div([  ])([ Data_Html_Elements_Html5.h1([  ])([ Data_Html_Elements_Html5.text("project URL") ]), Data_Html_Elements_Html5.a([ Data_Html_Attributes_Html5.href("http://github.com/philopon/sliding") ])([ Data_Html_Elements_Html5.text("github") ]) ])) ] ]);
     return {
         main: main
     };

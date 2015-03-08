@@ -19,7 +19,7 @@ type Size = { height :: Number, width :: Number }
 #### `Indicator`
 
 ``` purescript
-type Indicator = Size -> [[VTree]] -> State -> VTree
+type Indicator = Size -> Page -> State -> VTree
 ```
 
 
@@ -48,6 +48,13 @@ numIndicator :: Indicator
 
 ``` purescript
 newtype Sliding
+```
+
+
+#### `State`
+
+``` purescript
+type State = { current :: Page, windowSize :: Size }
 ```
 
 

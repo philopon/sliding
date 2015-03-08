@@ -1,5 +1,6 @@
 module Sliding.Engine
   ( Size(), Sliding()
+  , State()
   , SlideConfig()
   , defaultSlideConfig
   , Indicator()
@@ -9,6 +10,7 @@ module Sliding.Engine
   ) where
 
 import Global
+import Control.Monad.Eff.Class
 import Data.Maybe(Maybe(..), fromMaybe, maybe)
 import Data.Array((!!), length, elemIndex, filter, null)
 import qualified Data.Array.Unsafe as U
@@ -22,6 +24,7 @@ import qualified Data.Html.Events.Normal as EV
 import Network.Routing.Client
 import Data.Function
 import qualified FRP.Kefir as K
+import Sliding.Cached
 
 foreign import browerWindow "var browerWindow = window" :: Node
 foreign import body "var body = document.body" :: Node
@@ -72,14 +75,6 @@ function toggleFullScreen() {
   }
 }""" :: forall e. Eff e Unit
 
-foreign import setHash """
-function setHash(s){
-  return function(){
-    window.location.hash = s;
-    return {};
-  }
-}""" :: forall e. String -> Eff e Unit
-
 foreign import orImpl """
 function orImpl(a, b){
   return a || b;
@@ -118,7 +113,7 @@ function getElementSize(e){
 getSize :: Node -> Eff _ Size
 getSize e = if e `equal` body then getWindowSize else getElementSize e
 
-type Indicator = Size -> [[VTree]] -> State -> VTree
+type Indicator = Size -> Page -> State -> VTree
 
 type SlideConfig =
   { size          :: Size
@@ -134,7 +129,7 @@ defaultSlideConfig =
   }
 
 numIndicator :: Indicator 
-numIndicator _ slides state = E.div
+numIndicator _ maxPage state = E.div
   [ A.class_ "page-number"
   , A.style
       { position: "absolute"
@@ -144,11 +139,11 @@ numIndicator _ slides state = E.div
   ]
   [ E.span [A.class_ "current"] [E.text $ show $ state.current.page + 1]
   , E.span [] [E.text "/"]
-  , E.span [A.class_ "all"] [E.text $ show $ length slides]
+  , E.span [A.class_ "all"] [E.text $ show $ maxPage.page]
   ]
 
-render :: SlideConfig -> [[VTree]] -> State -> VTree
-render config slides state =
+render :: SlideConfig -> Page -> VTree -> State -> VTree
+render config maxPage slide state =
   let scale = min
         (state.windowSize.height / config.size.height)
         (state.windowSize.width  / config.size.width)
@@ -169,21 +164,20 @@ render config slides state =
         }
     , A.class_ "slide-wrapper"
     ] $
-    fromMaybe (U.head $ U.head slides) (slides !! state.current.page >>= \s -> s !! state.current.step) :
-    maybe [] (\p -> [p config.size slides state]) config.pager
+    slide : maybe [] (\p -> [p config.size maxPage state]) config.pager
 
 newtype Sliding = Sliding
   { action :: K.Stream (K.Emit ()) (K.All ()) Unit Action
   }
 
-type Current =
+type Page =
   { page :: Number
   , step :: Number
   }
 
 type State =
   { windowSize :: Size
-  , current    :: Current
+  , current    :: Page
   }
 
 foreign import equalImpl """
@@ -229,17 +223,26 @@ function swipeEventImpl(action, duration, node){
   }
 }""" :: forall e f. Fn3 {left :: f, right:: f} Number Node (Eff e Unit)
 
-slide :: SlideConfig -> Node -> [[VTree]] -> Eff _ Sliding
 slide config parent slides0 = do
   let slides = filter (\s -> not $ null s) slides0
+
+  -- action emitter
+  action <- K.emitter
+
+  -- URI router
+  router <- runRouter' $ do
+    num <- param $ regex "[1-9][0-9]*"
+
+    route2 (exact "page" -/ num  +/ num +/ empty) $ \p s ->
+      liftEff $ K.emit action $ setPage (readInt 10 p - 1) (readInt 10 s - 1)
+
+    notFound $ setRoute "/page/1/1"
+
 
   -- elements
   html   <- createElement $ E.div [] []
   node <- getNode html
   appendChild parent node
-
-  -- action emitter
-  action <- K.emitter
 
   -- window resize events
   wSize0 <- getSize parent
@@ -283,25 +286,23 @@ slide config parent slides0 = do
     >>= K.debounce 20
 
   -- state
-  state  <- K.scanEff (update html slides)
+  state  <- K.scanEff (update html slides router.setRoute)
     {windowSize: wSize0, current: {page: 0, step: 0}} merged
 
   -- execute FRP
-  K.onValue state $ \st ->
-    patch (render config slides st) html
+  K.onValue state $ \st -> case slides !! st.current.page of
+    Nothing -> return unit
+    Just ss -> case ss !! st.current.step of
+      Nothing -> return unit
+      Just sl -> do
+        v <- getCached sl
+        patch (render config {page: length slides, step: length ss} v st) html
 
-  -- URI router
-  runRouter $ do
-    num <- param $ regex "[1-9][0-9]*"
-    route2 (exact "page" -/ num  +/ num +/ empty) $ \p s -> do
-      K.emit action $ setPage (readInt 10 p - 1) (readInt 10 s - 1)
-
-    notFound $ \setRoute -> setRoute "/page/1/1"
-
+  router.init
   return $ Sliding { action: action }
 
 data Action
-  = ModifyPage (Current -> Current)
+  = ModifyPage (Page -> Page)
   | ReSize Size
   | NoOp
 
@@ -314,16 +315,16 @@ nextStep  = ModifyPage $ \p -> {page: p.page, step: p.step + 1}
 prevStep :: Action
 prevStep  = ModifyPage $ \p -> {page: p.page, step: p.step - 1}
 
-update :: Html -> [[VTree]] -> State -> Action -> Eff _ State
-update html slides state action = case action of
+update :: Html -> [[_]] -> (String -> Eff _ Unit) -> State -> Action -> Eff _ State
+update html slides setRoute state action = case action of
   NoOp         -> return state
   ReSize size  -> return $ state { windowSize = size }
   ModifyPage f -> do
     let c' = rePage slides $ f state.current
-    setHash $ "#/page/" ++ show (c'.page + 1) ++ "/" ++ show (c'.step + 1)
+    setRoute $ "/page/" ++ show (c'.page + 1) ++ "/" ++ show (c'.step + 1)
     return $ state { current = c' }
 
-rePage :: [[VTree]] -> Current -> Current
+rePage :: [[_]] -> Page -> Page
 rePage slides cur =
   let p  = restrict 0 (length slides - 1) cur.page
       cn = maybe 1 (\v -> length v - 1) $ slides !! p
